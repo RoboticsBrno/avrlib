@@ -37,12 +37,12 @@ public:
 
 	bool rx_empty() const
 	{
-		return UCSR0A & (1<<RXC0);
+		return (UCSR0A & (1<<RXC0)) == 0;
 	}
 
 	bool tx_empty() const
 	{
-		return UCSR0A & (1<<UDRE0);
+		return (UCSR0A & (1<<UDRE0)) != 0;
 	}
 };
 

@@ -14,7 +14,7 @@ public:
 	explicit usart1(uint16_t ubrr)
 	{
 		UBRR1H = ubrr >> 8;
-		UBRR0H = ubrr & 0xFF;
+		UBRR1L = ubrr & 0xFF;
 		UCSR1A = (1<<U2X1);
 		UCSR1C = (1<<UCSZ11)|(1<<UCSZ10);
 		UCSR1B = (1<<RXEN1)|(1<<TXEN1);
@@ -37,12 +37,12 @@ public:
 
 	bool rx_empty() const
 	{
-		return UCSR1A & (1<<RXC1);
+		return (UCSR1A & (1<<RXC1)) == 0;
 	}
 
 	bool tx_empty() const
 	{
-		return UCSR1A & (1<<UDRE1);
+		return (UCSR1A & (1<<UDRE1)) != 0;
 	}
 };
 
