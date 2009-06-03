@@ -1,6 +1,9 @@
 #ifndef AVRLIB_BOOTSEQ_HPP
 #define AVRLIB_BOOTSEQ_HPP
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
 namespace avrlib {
 
 class nobootseq
