@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "usart_base.hpp"
+#include "bootseq.hpp"
 
 namespace avrlib {
 
