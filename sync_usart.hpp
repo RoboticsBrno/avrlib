@@ -6,12 +6,14 @@
 
 namespace avrlib {
 
-template <typename Usart>
+template <typename Usart, typename Bootseq = nobootseq>
 class sync_usart
 {
 public:
 	typedef Usart usart_type;
 	typedef typename usart_type::value_type value_type;
+
+	typedef Bootseq bootseq_type;
 
 	explicit sync_usart(uint32_t speed)
 		: m_usart(detail::get_ubrr(speed))
@@ -29,7 +31,7 @@ public:
 		{
 		}
 
-		return m_usart.recv();
+		return m_bootseq.check(m_usart.recv());
 	}
 
 	void write(value_type v)
@@ -43,6 +45,7 @@ public:
 
 private:
 	usart_type m_usart;
+	bootseq_type m_bootseq;
 };
 
 }
