@@ -13,7 +13,7 @@ void send(Stream & s, char const * str)
 }
 
 template <typename Stream, typename Unsigned>
-void send_hex(Stream & s, Unsigned v, uint8_t width = 0)
+void send_hex(Stream & s, Unsigned v, uint8_t width = 0, char fill = '0')
 {
 	static char const digits[] = "0123456789ABCDEF";
 
@@ -37,7 +37,7 @@ void send_hex(Stream & s, Unsigned v, uint8_t width = 0)
 	}
 
 	while (i < width)
-		buf[i++] = ' ';
+		buf[i++] = fill;
 	
 	for (; i > 0; --i)
 		s.write(buf[i - 1]);
