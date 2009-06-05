@@ -15,6 +15,16 @@ public:
 	}
 };
 
+inline void wdt_reset()
+{
+	cli();
+	WDTCR = (1<<WDCE)|(1<<WDE);
+	WDTCR = (1<<WDE);
+	for (;;)
+	{
+	}
+}
+
 class bootseq
 {
 public:
@@ -31,14 +41,7 @@ public:
 			m_state = 0;
 
 		if (m_state == 4)
-		{
-			cli();
-			WDTCR = (1<<WDCE)|(1<<WDE);
-			WDTCR = (1<<WDE);
-			for (;;)
-			{
-			}
-		}
+			wdt_reset();
 
 		return v;
 	}
