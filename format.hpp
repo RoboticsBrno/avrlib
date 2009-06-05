@@ -43,6 +43,41 @@ void send_hex(Stream & s, Unsigned v, uint8_t width = 0, char fill = '0')
 		s.write(buf[i - 1]);
 }
 
+template <typename Stream, typename Integer>
+void send_int(Stream & s, Integer v, uint8_t width = 0, char fill = ' ')
+{
+	char buf[32];
+	uint8_t i = 0;
+	bool negative = false;
+
+	if (v == 0)
+	{
+		buf[i++] = '0';
+	}
+	else 
+	{
+		if (v < 0)
+		{
+			negative = true;
+			v = -v;
+		}
+		
+		for (; v != 0; v /= 10)
+		{
+			buf[i++] = (v % 10) + '0';
+		}
+	}
+	
+	if (negative)
+		buf[i++] = '-';
+
+	while (i < width)
+		buf[i++] = fill;
+	
+	for (; i > 0; --i)
+		s.write(buf[i - 1]);
+}
+
 }
 
 #endif
