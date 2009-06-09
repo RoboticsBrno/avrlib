@@ -78,6 +78,14 @@ void send_int(Stream & s, Integer v, uint8_t width = 0, char fill = ' ')
 		s.write(buf[i - 1]);
 }
 
+template <typename Stream, typename T>
+void send_bin(Stream & s, T const & t)
+{
+	char const * ptr = reinterpret_cast<char const *>(&t);
+	for (uint8_t i = 0; i < sizeof t; ++i)
+		s.write(ptr[i]);
+}
+
 }
 
 #endif
