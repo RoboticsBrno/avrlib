@@ -21,7 +21,7 @@ public:
 	uint8_t command() const { return m_cmd; }
 	uint8_t size() const { return m_size; }
 
-	state_t push_data(uint8_t ch)
+	uint8_t push_data(uint8_t ch)
 	{
 		switch (m_state)
 		{
@@ -32,9 +32,15 @@ public:
 				break;
 			}
 
-			m_size = 1;
-			m_buffer[0] = ch;
-			m_state = simple_command;
+			if (ch > 16)
+			{
+				m_size = 0;
+				m_cmd = ch;
+				m_state = simple_command;
+				break;
+			}
+
+			m_state = bad;
 			break;
 
 		case simple_command:
@@ -58,7 +64,13 @@ public:
 			;
 		}
 
-		return m_state;
+		if (m_state == bad)
+			return 254;
+
+		if (m_state == simple_command || m_state == ready)
+			return m_cmd;
+
+		return 255;
 	}
 
 	state_t state() const { return m_state; }
@@ -87,7 +99,7 @@ public:
 	{
 	}
 
-	state_t push_data(uint8_t ch)
+	uint8_t push_data(uint8_t ch)
 	{
 		time_type const & time = m_timer();
 		if (time - m_last_push > m_timeout)
