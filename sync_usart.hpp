@@ -43,6 +43,10 @@ public:
 
 		m_usart.send(v);
 	}
+	
+	void process()
+	{
+	}
 
 private:
 	usart_type m_usart;

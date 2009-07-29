@@ -95,6 +95,7 @@ uint8_t readline(Stream & s, uint8_t * buffer, uint8_t len)
 	{
 		while (s.empty())
 		{
+			s.process();
 		}
 
 		uint8_t ch = s.read();
