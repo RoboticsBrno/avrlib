@@ -86,6 +86,36 @@ void send_bin(Stream & s, T const & t)
 		s.write(ptr[i]);
 }
 
+template <typename Stream>
+uint8_t readline(Stream & s, uint8_t * buffer, uint8_t len)
+{
+	uint8_t i = 0;
+
+	while (i < len)
+	{
+		while (s.empty())
+		{
+		}
+
+		uint8_t ch = s.read();
+		buffer[i++] = ch;
+
+		if (ch == '\n')
+			break;
+	}
+
+	return i;
+}
+
+template <int N>
+bool bufcmp(uint8_t const * buf, uint8_t len, char const (&pattern)[N])
+{
+	for (int i = 0; i < N - 1; ++i)
+		if (buf[i] != pattern[i])
+			return false;
+	return true;
+}
+
 }
 
 #endif
