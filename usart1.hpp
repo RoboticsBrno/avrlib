@@ -11,13 +11,16 @@ class usart1
 public:
 	typedef uint8_t value_type;
 
-	explicit usart1(uint16_t ubrr)
+	usart1(uint16_t ubrr, bool rx_interrupt)
 	{
 		UBRR1H = ubrr >> 8;
 		UBRR1L = ubrr & 0xFF;
 		UCSR1A = (1<<U2X1);
 		UCSR1C = (1<<UCSZ11)|(1<<UCSZ10);
 		UCSR1B = (1<<RXEN1)|(1<<TXEN1);
+
+		if (rx_interrupt)
+			UCSR1B |= (1<<RXCIE1);
 	}
 
 	~usart1()
@@ -28,6 +31,11 @@ public:
 	void send(value_type v)
 	{
 		UDR1 = v;
+	}
+
+	bool overflow() const
+	{
+		return (UCSR1A & (1<<DOR1)) != 0;
 	}
 
 	value_type recv()

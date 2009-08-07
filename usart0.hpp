@@ -11,13 +11,16 @@ class usart0
 public:
 	typedef uint8_t value_type;
 
-	explicit usart0(uint16_t ubrr)
+	usart0(uint16_t ubrr, bool rx_interrupt)
 	{
 		UBRR0H = ubrr >> 8;
 		UBRR0L = ubrr & 0xFF;
 		UCSR0A = (1<<U2X0);
 		UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);
 		UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+
+		if (rx_interrupt)
+			UCSR0B |= (1<<RXCIE0);
 	}
 
 	~usart0()
@@ -28,6 +31,11 @@ public:
 	void send(value_type v)
 	{
 		UDR0 = v;
+	}
+
+	bool overflow() const
+	{
+		return (UCSR0A & (1<<DOR0)) != 0;
 	}
 
 	value_type recv()
