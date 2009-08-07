@@ -60,6 +60,14 @@ public:
 		else
 			return m_base;
 	}
+	
+	void set(time_type value)
+	{
+		if (m_running)
+			m_base = m_timer() - value;
+		else
+			m_base = value;
+	}
 
 private:
 	Timer const & m_timer;
@@ -78,6 +86,11 @@ public:
 	timeout(Timer const & timer, time_type timeout)
 		: stopwatch<Timer>(timer), m_timeout(timeout)
 	{
+	}
+
+	void force()
+	{
+		this->set(m_timeout + 1);
 	}
 
 	operator bool() const
