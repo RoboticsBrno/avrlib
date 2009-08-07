@@ -44,7 +44,11 @@ public:
 		m_usart.send(v);
 	}
 	
-	void process()
+	void process_rx()
+	{
+	}
+
+	void process_tx()
 	{
 	}
 
