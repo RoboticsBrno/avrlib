@@ -16,8 +16,8 @@ public:
 
 	typedef Bootseq bootseq_type;
 
-	explicit sync_usart(uint32_t speed)
-		: m_usart(detail::get_ubrr(speed))
+	explicit sync_usart(uint32_t speed, bool rx_interrupt = false)
+		: m_usart(detail::get_ubrr(speed), rx_interrupt)
 	{
 	}
 

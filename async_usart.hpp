@@ -8,23 +8,29 @@
 
 namespace avrlib {
 
-template <typename Usart, int RxBufferSize, int TxBufferSize, typename Bootseq = nobootseq>
+template <typename Usart, int RxBufferSize, int TxBufferSize, typename Bootseq = nobootseq, typename Overflow = uint32_t>
 class async_usart
 {
 public:
 	typedef Usart usart_type;
+	typedef Overflow overflow_type;
 	typedef typename usart_type::value_type value_type;
 
 	typedef Bootseq bootseq_type;
 
-	explicit async_usart(uint32_t speed)
-		: m_usart(detail::get_ubrr(speed))
+	explicit async_usart(uint32_t speed, bool rx_interrupt = false)
+		: m_usart(detail::get_ubrr(speed), rx_interrupt), m_overflows(0)
 	{
 	}
 
 	bool empty() const
 	{
 		return m_rx_buffer.empty();
+	}
+
+	bool tx_empty() const
+	{
+		return m_tx_buffer.empty();
 	}
 	
 	value_type read()
@@ -44,15 +50,20 @@ public:
 			m_tx_buffer.push(v);
 	}
 	
-	void process()
+	void process_rx()
 	{
-		if (!m_usart.rx_empty())
-		{
-			value_type v = m_bootseq.check(m_usart.recv());
-			if (!m_rx_buffer.full())
-				m_rx_buffer.push(v);
-		}
-		
+		if (m_usart.rx_empty())
+			return;
+
+		if (m_usart.overflow())
+			++m_overflows;
+		value_type v = m_bootseq.check(m_usart.recv());
+		if (!m_rx_buffer.full())
+			m_rx_buffer.push(v);
+	}
+
+	void process_tx()
+	{
 		if (!m_tx_buffer.empty() && m_usart.tx_empty())
 		{
 			m_usart.send(m_tx_buffer.top());
@@ -60,11 +71,18 @@ public:
 		}
 	}
 
+	overflow_type overflows() const { return m_overflows; }
+
+	usart_type & usart() { return m_usart; }
+	usart_type const & usart() const { return m_usart; }
+
 private:
 	usart_type m_usart;
 	buffer<value_type, RxBufferSize> m_rx_buffer;
 	buffer<value_type, TxBufferSize> m_tx_buffer;
 	bootseq_type m_bootseq;
+
+	overflow_type m_overflows;
 };
 
 }
