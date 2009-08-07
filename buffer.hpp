@@ -43,9 +43,9 @@ public:
 	}
 
 private:
-	value_type m_buffer[size];
-	uint8_t m_wptr;
-	uint8_t m_rptr;
+	volatile value_type m_buffer[size];
+	volatile uint8_t m_wptr;
+	volatile uint8_t m_rptr;
 
 	static uint8_t next(uint8_t v)
 	{
