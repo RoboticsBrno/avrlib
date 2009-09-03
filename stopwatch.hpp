@@ -69,6 +69,14 @@ public:
 			m_base = value;
 	}
 
+	void decrease(time_type time)
+	{
+		if (m_running)
+			m_base += time;
+		else
+			m_base -= time;
+	}
+
 private:
 	Timer const & m_timer;
 	bool m_running;
@@ -91,6 +99,11 @@ public:
 	void force()
 	{
 		this->set(m_timeout + 1);
+	}
+
+	void ack()
+	{
+		this->decrease(m_timeout);
 	}
 
 	operator bool() const
