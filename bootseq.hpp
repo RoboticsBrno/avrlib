@@ -18,8 +18,15 @@ public:
 inline void wdt_reset()
 {
 	cli();
+#if defined(WDTCR)
 	WDTCR = (1<<WDCE)|(1<<WDE);
 	WDTCR = (1<<WDE);
+#elif defined(WDTCSR)
+	WDTCSR = (1<<WDCE)|(1<<WDE);
+	WDTCSR = (1<<WDE);
+#else
+# error Unsupported Watchdog timer interface.
+#endif
 	for (;;)
 	{
 	}
