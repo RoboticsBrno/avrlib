@@ -1,5 +1,5 @@
-#ifndef AVRLIB_PORTA_HPP
-#define AVRLIB_PORTA_HPP
+#ifndef AVRLIB_PORTG_HPP
+#define AVRLIB_PORTG_HPP
 
 #include <avr/io.h>
 
