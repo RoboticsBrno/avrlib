@@ -43,6 +43,40 @@ void send_hex(Stream & s, Unsigned v, uint8_t width = 0, char fill = '0')
 		s.write(buf[i - 1]);
 }
 
+template <typename Stream, typename Signed>
+void send_shex(Stream & s, Signed v, uint8_t width = 0, char fill = ' ')
+{
+	static char const digits[] = "0123456789ABCDEF";
+
+	char buf[32];
+	uint8_t i = 0;
+
+	bool negative = (v < 0);
+	if (negative)
+		v = -v;
+
+	if (v == 0)
+	{
+		buf[i++] = '0';
+	}
+	else
+	{
+		for (; v != 0; v >>= 4)
+		{
+			buf[i++] = digits[v & 0xF];
+		}
+	}
+
+	if (negative)
+		buf[i++] = '-';
+
+	while (i < width)
+		buf[i++] = fill;
+	
+	for (; i > 0; --i)
+		s.write(buf[i - 1]);
+}
+
 template <typename Stream, typename Integer>
 void send_int(Stream & s, Integer v, uint8_t width = 0, char fill = ' ')
 {
