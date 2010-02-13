@@ -32,6 +32,31 @@ inline void wdt_reset()
 	}
 }
 
+class zigbit_bootseq
+{
+public:
+	zigbit_bootseq()
+		: m_state(0)
+	{
+	}
+
+	uint8_t check(uint8_t v)
+	{
+		static uint8_t const seq[] = { 0xB2, 0xA5, 0x65, 0x4B };
+
+		if (seq[m_state++] != v)
+			m_state = 0;
+
+		if (m_state == 4)
+			wdt_reset();
+
+		return v;
+	}
+
+private:
+	uint8_t m_state;
+};
+
 class bootseq
 {
 public:
