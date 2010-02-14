@@ -11,8 +11,18 @@ struct timer1
 	typedef uint16_t value_type;
 	static const uint8_t value_bits = 16;
 
-	static value_type value() { return TCNT1; }
-	static void value(value_type v) { TCNT1 = v; }
+	static value_type value()
+	{
+		value_type res = TCNT1L;
+		res |= TCNT1H << 8;
+		return res;
+	}
+
+	static void value(value_type v)
+	{
+		TCNT1H = v >> 8;
+		TCNT1L = v;
+	}
 
 	static void clock_source(timer_clock_source v)
 	{
@@ -112,6 +122,16 @@ struct timer1
 		}
 		else
 			TIMSK1 &= ~(1<<TOIE1);
+	}
+
+	static bool overflow()
+	{
+		return TIFR1 & (1<<TOV1);
+	}
+
+	static void clear_overflow()
+	{
+		TIFR1 = (1<<TOV1);
 	}
 };
 
