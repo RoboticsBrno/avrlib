@@ -15,7 +15,7 @@ public:
 	}
 };
 
-inline void wdt_reset()
+inline void force_wd_reset()
 {
 	cli();
 #if defined(WDTCR)
@@ -48,7 +48,7 @@ public:
 			m_state = 0;
 
 		if (m_state == 4)
-			wdt_reset();
+			force_wd_reset();
 
 		return v;
 	}
@@ -73,7 +73,7 @@ public:
 			m_state = 0;
 
 		if (m_state == 4)
-			wdt_reset();
+			force_wd_reset();
 
 		return v;
 	}
