@@ -9,6 +9,7 @@ namespace avrlib {
 struct timer1
 {
 	typedef uint16_t value_type;
+	typedef uint16_t time_type;
 	static const uint8_t value_bits = 16;
 
 	static value_type value()
@@ -110,6 +111,16 @@ struct timer1
 			}
 			else
 				TIMSK1 &= (1<<ICIE1);
+		}
+
+		static bool captured()
+		{
+			return TIFR1 & (1<<ICF1);
+		}
+
+		static void clear_captured()
+		{
+			TIFR1 = (1<<ICF1);
 		}
 	};
 
