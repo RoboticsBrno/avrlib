@@ -16,7 +16,7 @@ T load_acquire(T const volatile & t)
 }
 
 template <typename T>
-void store_release(T volatile & t, T v)
+void store_release(T volatile & t, typename identity<T>::type v)
 {
 	t = v;
 }
