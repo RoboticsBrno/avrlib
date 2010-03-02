@@ -4,6 +4,21 @@
 namespace avrlib {
 
 template <typename Timer>
+void wait(Timer & timer, typename Timer::time_type time)
+{
+	typename Timer::time_type base = timer.value();
+	while (time > 0)
+	{
+		typename Timer::time_type new_base = timer.value();
+		typename Timer::time_type difference = new_base - base;
+		if (time < difference)
+			break;
+		time -= difference;
+		base = new_base;
+	}
+}
+
+template <typename Timer>
 class stopwatch
 {
 public:
@@ -18,7 +33,7 @@ public:
 	void clear()
 	{
 		if (m_running)
-			m_base = m_timer();
+			m_base = m_timer.value();
 		else
 			m_base = 0;
 	}
@@ -32,14 +47,14 @@ public:
 	void restart()
 	{
 		m_running = true;
-		m_base = m_timer();
+		m_base = m_timer.value();
 	}
 
 	void start()
 	{
 		if (!m_running)
 		{
-			m_base = m_timer() - m_base;
+			m_base = m_timer.value() - m_base;
 			m_running = true;
 		}
 	}
@@ -48,7 +63,7 @@ public:
 	{
 		if (m_running)
 		{
-			m_base = m_timer() - m_base;
+			m_base = m_timer.value() - m_base;
 			m_running = false;
 		}
 	}
@@ -56,7 +71,7 @@ public:
 	time_type operator()() const
 	{
 		if (m_running)
-			return m_timer() - m_base;
+			return m_timer.value() - m_base;
 		else
 			return m_base;
 	}
@@ -64,7 +79,7 @@ public:
 	void set(time_type value)
 	{
 		if (m_running)
-			m_base = m_timer() - value;
+			m_base = m_timer.value() - value;
 		else
 			m_base = value;
 	}
@@ -79,8 +94,8 @@ public:
 
 private:
 	Timer const & m_timer;
-	bool m_running;
-	time_type m_base;
+	volatile bool m_running;
+	volatile time_type m_base;
 };
 
 template <typename Timer>
