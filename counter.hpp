@@ -43,7 +43,7 @@ struct counter
 		timer_type::clock_source(timer_no_clock);
 	}
 
-	time_type operator()() const
+	time_type value() const
 	{
 		cli();
 		for (;;)
