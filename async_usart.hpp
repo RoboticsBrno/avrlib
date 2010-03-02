@@ -37,6 +37,9 @@ public:
 	{
 		while (m_rx_buffer.empty())
 		{
+			cli();
+			this->process_rx();
+			sei();
 		}
 		
 		value_type res = m_rx_buffer.top();
