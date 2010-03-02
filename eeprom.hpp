@@ -5,10 +5,10 @@
 
 namespace avrlib {
 
-void load_eeprom(uint8_t address, uint8_t * ptr, uint8_t len)
+inline void load_eeprom(uint8_t address, uint8_t * ptr, uint8_t len)
 {
 	uint8_t * pend = ptr + len;
-	
+
 	EEARH = 0;
 	EEARL = address;
 
@@ -24,30 +24,41 @@ template <typename T>
 T load_eeprom(uint8_t address)
 {
 	T res;
-	load_eeprom(address, (uint8_t const *)&res, sizeof res);
+	load_eeprom(address, (uint8_t *)&res, sizeof res);
 	return res;
 }
 
-void store_eeprom(uint8_t address, uint8_t const * ptr, uint8_t len)
+inline void store_eeprom(uint8_t address, uint8_t const * ptr, uint8_t len)
 {
+#ifndef EEMWE
+# define EEMWE_ EEMPE
+# define EEWE_ EEPE
+#else
+# define EEMWE_ EEMWE
+# define EEWE_ EEWE
+#endif
+
 	uint8_t const * pend = ptr + len;
-	
+
 	EEARH = 0;
 	EEARL = address;
 
 	while (ptr != pend)
 	{
 		EEDR = *ptr++;
-		
-		EECR = (1<<EEMWE);
-		EECR = (1<<EEWE);
-		
-		while (EECR & (1<<EEWE))
+
+		EECR = (1<<EEMWE_);
+		EECR = (1<<EEWE_);
+
+		while (EECR & (1<<EEWE_))
 		{
 		}
 
 		++EEARL;
 	}
+
+#undef EEMWE_
+#undef EEWE_
 }
 
 template <typename T>
