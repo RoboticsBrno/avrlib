@@ -82,6 +82,37 @@ private:
 	uint8_t m_state;
 };
 
+template <uint16_t boot_entry_address>
+class legacy_bootseq
+{
+public:
+	legacy_bootseq()
+		: m_state(0)
+	{
+	}
+
+	uint8_t check(uint8_t v)
+	{
+		static uint8_t const seq[] = { 0x74, 0x7E, 0x7A, 0x33 };
+
+		if (seq[m_state++] != v)
+			m_state = 0;
+
+		if (m_state == 4)
+		{
+			void clean();
+			clean();
+
+			((void (*)())(void *)boot_entry_address)();
+		}
+
+		return v;
+	}
+
+private:
+	uint8_t m_state;
+};
+
 }
 
 #endif
