@@ -1,6 +1,8 @@
 #ifndef AVRLIB_COMMAND_PARSER_HPP
 #define AVRLIB_COMMAND_PARSER_HPP
 
+#include <stdint.h>
+
 namespace avrlib {
 
 class command_parser
