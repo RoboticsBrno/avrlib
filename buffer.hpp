@@ -1,16 +1,17 @@
 #ifndef AVRLIB_BUFFER_HPP
 #define AVRLIB_BUFFER_HPP
 
-#include <stdint.h>
+#include "numeric.hpp"
 
 namespace avrlib {
 
-template <typename T, uint8_t Capacity>
+template <typename T, uint_max_t Capacity>
 class buffer
 {
 public:
+	typedef typename least_uint<Capacity + 1>::type index_type;
 	typedef T value_type;
-	static const uint8_t capacity = Capacity;
+	static const index_type capacity = Capacity;
 
 	buffer()
 		: m_wptr(0), m_rptr(0)
@@ -43,18 +44,18 @@ public:
 		return m_buffer[m_rptr];
 	}
 
-	uint8_t size() const
+	index_type size() const
 	{
 		return dist(m_wptr, m_rptr);
 	}
 
-	value_type operator[](uint8_t i) const
+	value_type operator[](index_type i) const
 	{
 		return m_buffer[next(m_rptr, i)];
 	}
 
 	template <typename Writer>
-	void copy_to(Writer & writer, uint8_t len) const
+	void copy_to(Writer & writer, index_type len) const
 	{
 		uint8_t rptr = m_rptr;
 
@@ -70,11 +71,11 @@ public:
 	}
 
 	template <typename Reader>
-	uint8_t append(Reader & reader, uint8_t len)
+	index_type append(Reader & reader, index_type len)
 	{
-		uint8_t wptr = m_wptr;
+		index_type wptr = m_wptr;
 
-		uint8_t free = capacity - this->size();
+		index_type free = capacity - this->size();
 		if (free < len)
 			len = free;
 
@@ -97,32 +98,32 @@ public:
 		m_rptr = next(m_rptr);
 	}
 
-	void pop(uint8_t len)
+	void pop(index_type len)
 	{
 		m_rptr = next(m_rptr, len);
 	}
 
 private:
 	volatile value_type m_buffer[capacity];
-	volatile uint8_t m_wptr;
-	volatile uint8_t m_rptr;
+	volatile index_type m_wptr;
+	volatile index_type m_rptr;
 
-	static uint8_t next(uint8_t v)
+	static index_type next(index_type v)
 	{
-		uint8_t res = v + 1;
+		index_type res = v + 1;
 		if (res == capacity)
 			res = 0;
 		return res;
 	}
 
-	static uint8_t next(uint8_t v, uint8_t len)
+	static index_type next(index_type v, index_type len)
 	{
-		return uint8_t(capacity - v) <= len? len - uint8_t(capacity - v): v + len;
+		return index_type(capacity - v) <= len? len - index_type(capacity - v): v + len;
 	}
 
-	static uint8_t dist(uint8_t ptr, uint8_t base)
+	static index_type dist(index_type ptr, index_type base)
 	{
-		return ptr >= base? ptr - base: ptr + uint8_t(capacity - base);
+		return ptr >= base? ptr - base: ptr + index_type(capacity - base);
 	}
 };
 
