@@ -23,6 +23,11 @@ public:
 		return m_value;
 	}
 
+	value_type load_consume() const
+	{
+		return m_value;
+	}
+
 	operator value_type() const volatile
 	{
 		return m_value;

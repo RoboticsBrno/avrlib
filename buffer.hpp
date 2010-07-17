@@ -2,6 +2,7 @@
 #define AVRLIB_BUFFER_HPP
 
 #include "numeric.hpp"
+#include "assert.hpp"
 
 namespace avrlib {
 
@@ -55,9 +56,10 @@ public:
 	}
 
 	template <typename Writer>
-	void copy_to(Writer & writer, index_type len) const
+	void copy_to(Writer & writer, index_type len, index_type offset = 0) const
 	{
-		uint8_t rptr = m_rptr;
+		AVRLIB_ASSERT(len + offset <= this->size());
+		uint8_t rptr = next(m_rptr, offset);
 
 		if (next(rptr, len) < rptr)
 		{
