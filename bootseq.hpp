@@ -19,7 +19,11 @@ inline void force_wd_reset()
 {
 	cli();
 #if defined(WDTCR)
+# if defined(WDCE)
 	WDTCR = (1<<WDCE)|(1<<WDE);
+# else
+	WDTCR = (1<<WDTOE)|(1<<WDE);
+# endif
 	WDTCR = (1<<WDE);
 #elif defined(WDTCSR)
 	WDTCSR = (1<<WDCE)|(1<<WDE);
