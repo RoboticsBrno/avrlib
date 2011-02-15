@@ -17,8 +17,22 @@ enum timer_clock_source
 
 enum timer_mode
 {
-	timer_mode_normal = 0,
-	timer_mode_ctc = 4,
+	timer_mode_normal,
+	timer_mode_pwmp_8,
+	timer_mode_pwmp_9,
+	timer_mode_pwmp_10,
+	timer_mode_ctc_ocra,
+	timer_mode_pwm_8,
+	timer_mode_pwm_9,
+	timer_mode_pwm_10,
+	timer_mode_pwmpf_icr,
+	timer_mode_pwmpf_ocra,
+	timer_mode_pwmp_icr,
+	timer_mode_pwmp_ocra,
+	timer_mode_ctc_icr,
+	timer_mode_13,
+	timer_mode_pwm_icr,
+	timer_mode_pwm_ocra,
 };
 
 enum timer_ocr_mode
