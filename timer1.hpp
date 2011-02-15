@@ -4,6 +4,18 @@
 #include <avr/io.h>
 #include "timer_base.hpp"
 
+#ifndef TIFR1
+# define TIFR1 TIFR
+#endif
+
+#ifndef TIMSK1
+# define TIMSK1 TIMSK
+#endif
+
+#ifndef ICIE1
+# define ICIE1 TICIE1
+#endif
+
 namespace avrlib {
 
 struct timer1
@@ -70,6 +82,7 @@ struct timer1
 		}
 	};
 
+#ifdef OCR1C
 	struct ocrc
 	{
 		static void mode(timer_ocr_mode v) { TCCR1A = (TCCR1A & 0xf3) | (v << 2); }
@@ -86,6 +99,7 @@ struct timer1
 				TIMSK1 &= (1<<OCIE1C);
 		}
 	};
+#endif
 
 	struct icr
 	{
@@ -124,7 +138,7 @@ struct timer1
 		}
 	};
 
-	static uint8_t tov_interrupt(bool v)
+	static void tov_interrupt(bool v)
 	{
 		if (v)
 		{
