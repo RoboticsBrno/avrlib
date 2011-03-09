@@ -16,7 +16,6 @@ public:
 		UBRR1H = ubrr >> 8;
 		UBRR1L = ubrr & 0xFF;
 		UCSR1A = (1<<U2X1);
-		UCSR1C = (1<<UCSZ11)|(1<<UCSZ10);
 		UCSR1B = (1<<RXEN1)|(1<<TXEN1);
 
 		if (rx_interrupt)
