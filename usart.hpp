@@ -16,11 +16,6 @@ public:
 		UBRRH = ubrr >> 8;
 		UBRRL = ubrr & 0xFF;
 		UCSRA = (1<<U2X);
-#if defined(URSEL)
-		UCSRC = (1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);
-#else
-		UCSRC = (1<<UCSZ1)|(1<<UCSZ0);
-#endif
 		UCSRB = (1<<RXEN)|(1<<TXEN);
 
 		if (rx_interrupt)
