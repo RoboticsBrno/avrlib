@@ -32,7 +32,12 @@ public:
 	{
 		return m_tx_buffer.empty();
 	}
-	
+
+	bool tx_ready() const
+	{
+		return m_tx_buffer.full();
+	}
+
 	value_type read()
 	{
 		while (m_rx_buffer.empty())
@@ -49,8 +54,14 @@ public:
 
 	void write(value_type v)
 	{
-		if (!m_tx_buffer.full())
-			m_tx_buffer.push(v);
+		while (m_tx_buffer.full())
+		{
+			cli();
+			this->process_tx();
+			sei();
+		}
+
+		m_tx_buffer.push(v);
 	}
 	
 	void process_rx()
