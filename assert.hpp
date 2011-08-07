@@ -2,7 +2,6 @@
 #define AVRLIB_ASSERT_HPP
 
 #include <avr/interrupt.h>
-#include "bootseq.hpp"
 
 namespace avrlib {
 
@@ -87,9 +86,11 @@ void trace_assert_common_main(char const * header, Usart & usart, uint8_t const 
 			}
 			send(usart, "\r\n");
 			break;
+#if 0
 		case 'q':
 			force_wd_reset();
 			break;
+#endif
 		case 't':
 			trace_mask.set();
 			break;
