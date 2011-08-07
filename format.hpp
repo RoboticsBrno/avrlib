@@ -2,6 +2,7 @@
 #define AVRLIB_FORMAT_HPP
 
 #include <stdint.h>
+#include <avr/pgmspace.h>
 
 namespace avrlib {
 
