@@ -64,6 +64,18 @@ public:
 		m_tx_buffer.push(v);
 	}
 	
+	void flush()
+	{
+		bool tx_empty = false;
+		while (!tx_empty)
+		{
+			cli();
+			this->process_tx();
+			tx_empty = m_tx_buffer.empty();
+			sei();
+		}
+	}
+
 	void process_rx()
 	{
 		if (m_usart.rx_empty())
@@ -83,6 +95,8 @@ public:
 			m_usart.send(m_tx_buffer.top());
 			m_tx_buffer.pop();
 		}
+
+		// TODO: flush the underlying port
 	}
 
 	overflow_type overflows() const { return m_overflows; }
