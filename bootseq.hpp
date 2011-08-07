@@ -3,17 +3,9 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "nobootseq.hpp"
 
 namespace avrlib {
-
-class nobootseq
-{
-public:
-	uint8_t check(uint8_t v)
-	{
-		return v;
-	}
-};
 
 inline void force_wd_reset()
 {

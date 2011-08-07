@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "usart_base.hpp"
-#include "bootseq.hpp"
+#include "nobootseq.hpp"
 #include "buffer.hpp"
 
 namespace avrlib {
