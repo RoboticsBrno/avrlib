@@ -7,7 +7,7 @@
 
 namespace avrlib {
 
-inline void force_wd_reset()
+inline void bootseq_reset()
 {
 	cli();
 #if defined(WDTCR)
@@ -20,6 +20,9 @@ inline void force_wd_reset()
 #elif defined(WDTCSR)
 	WDTCSR = (1<<WDCE)|(1<<WDE);
 	WDTCSR = (1<<WDE);
+#elif __AVR_ARCH__ >= 100 /*xmega*/
+	CCP = CCP_IOREG_gc;
+	RST.CTRL = RST_SWRST_bm;
 #else
 # error Unsupported Watchdog timer interface.
 #endif
@@ -44,7 +47,7 @@ public:
 			m_state = 0;
 
 		if (m_state == 4)
-			force_wd_reset();
+			bootseq_reset();
 
 		return v;
 	}
@@ -69,7 +72,7 @@ public:
 			m_state = 0;
 
 		if (m_state == 4)
-			force_wd_reset();
+			bootseq_reset();
 
 		return v;
 	}
