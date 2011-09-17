@@ -18,6 +18,11 @@ public:
 
 	typedef Bootseq bootseq_type;
 
+	async_usart()
+		: m_overflows(0)
+	{
+	}
+
 	explicit async_usart(uint32_t speed, bool rx_interrupt = false)
 		: m_usart(detail::get_ubrr(speed), rx_interrupt), m_overflows(0)
 	{
