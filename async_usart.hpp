@@ -57,6 +57,11 @@ public:
 		return res;
 	}
 
+	uint8_t read_size() const
+	{
+		return m_rx_buffer.size();
+	}
+
 	void write(value_type v)
 	{
 		while (m_tx_buffer.full())
@@ -103,6 +108,9 @@ public:
 
 		// TODO: flush the underlying port
 	}
+
+	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
+	rx_buffer_type & rx_buffer() { return m_rx_buffer; }
 
 	overflow_type overflows() const { return m_overflows; }
 
