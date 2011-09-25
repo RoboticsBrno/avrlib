@@ -16,16 +16,25 @@ public:
 	{
 	}
 
-	void open(USART_t & p, bool rx_interrupt = false)
+	void open(USART_t & p, bool rx_interrupt = false, bool synchronous = false)
 	{
 		m_p = &p;
-		m_p->BAUDCTRLA = 102;
-		m_p->BAUDCTRLB = (-1<<USART_BSCALE_gp);
+		if (synchronous)
+		{
+			m_p->BAUDCTRLA = (uint8_t)416;
+			m_p->BAUDCTRLB = (uint8_t)(416 >> 8);
+		}
+		else
+		{
+			m_p->BAUDCTRLA = 102;
+			m_p->BAUDCTRLB = (-1<<USART_BSCALE_gp);
+		}
 		if (rx_interrupt)
 			m_p->CTRLA = USART_RXCINTLVL_MED_gc;
 		else
 			m_p->CTRLA = 0;
-		m_p->CTRLC = (3<<USART_CHSIZE_gp);
+		m_p->CTRLC = (synchronous? USART_CMODE_SYNCHRONOUS_gc: USART_CMODE_ASYNCHRONOUS_gc)
+			| (3<<USART_CHSIZE_gp);
 		m_p->CTRLB = USART_RXEN_bm | USART_TXEN_bm;
 	}
 
