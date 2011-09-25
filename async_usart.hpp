@@ -23,11 +23,6 @@ public:
 	{
 	}
 
-	explicit async_usart(uint32_t speed, bool rx_interrupt = false)
-		: m_usart(detail::get_ubrr(speed), rx_interrupt), m_overflows(0)
-	{
-	}
-
 	bool empty() const
 	{
 		return m_rx_buffer.empty();
