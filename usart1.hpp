@@ -4,6 +4,8 @@
 #include <avr/io.h>
 #include <stdint.h>
 
+#include "usart_base.hpp"
+
 namespace avrlib {
 
 class usart1
@@ -11,8 +13,10 @@ class usart1
 public:
 	typedef uint8_t value_type;
 
-	usart1(uint16_t ubrr, bool rx_interrupt)
+	void open(uint32_t speed, bool rx_interrupt)
 	{
+		uint16_t ubrr = detail::get_ubrr(speed);
+
 		UBRR1H = ubrr >> 8;
 		UBRR1L = ubrr & 0xFF;
 		UCSR1A = (1<<U2X1);
@@ -22,7 +26,16 @@ public:
 			UCSR1B |= (1<<RXCIE1);
 	}
 
-	~usart1()
+	void open_sync_slave(bool rx_interrupt)
+	{
+		UCSR1C = (1<<UMSEL10)|(1<<UCSZ11)|(1<<UCSZ10);
+		UCSR1B = (1<<RXEN1)|(1<<TXEN1);
+
+		if (rx_interrupt)
+			UCSR1B |= (1<<RXCIE1);
+	}
+
+	void close()
 	{
 		UCSR1B = 0;
 	}
