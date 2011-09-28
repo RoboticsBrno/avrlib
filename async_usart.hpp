@@ -35,7 +35,7 @@ public:
 
 	bool tx_ready() const
 	{
-		return m_tx_buffer.full();
+		return !m_tx_buffer.full();
 	}
 
 	value_type read()
