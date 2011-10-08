@@ -40,7 +40,9 @@ public:
 
 	void close()
 	{
+		m_p->CTRLA = 0;
 		m_p->CTRLB = 0;
+		m_p->CTRLC = USART_CMODE_ASYNCHRONOUS_gc | (3<<USART_CHSIZE_gp);
 	}
 
 	void send(value_type v)
