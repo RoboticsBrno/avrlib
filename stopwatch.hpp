@@ -18,6 +18,22 @@ void wait(Timer & timer, typename Timer::time_type time)
 	}
 }
 
+template <typename Timer, typename Process>
+void wait(Timer & timer, typename Timer::time_type time, Process process)
+{
+	typename Timer::time_type base = timer.value();
+	while (time > 0)
+	{
+		typename Timer::time_type new_base = timer.value();
+		typename Timer::time_type difference = new_base - base;
+		if (time < difference)
+			break;
+		time -= difference;
+		base = new_base;
+		process();
+	}
+}
+
 template <typename Timer>
 class stopwatch
 {
