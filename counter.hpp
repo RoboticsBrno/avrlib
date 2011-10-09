@@ -45,20 +45,18 @@ struct counter
 
 	time_type value() const
 	{
-		cli();
+		uint16_t time = timer_type::value();
+		uint16_t overflows;
+
 		for (;;)
 		{
-			uint16_t overflows = static_cast<uint16_t volatile const &>(m_overflows);
-			typename timer_type::value_type postval = timer_type::value();
+			overflows = static_cast<uint16_t volatile const &>(m_overflows);
+			uint16_t new_time = timer_type::value();
 
-			if (!timer_type::overflow())
-			{
-				sei();
-				return ((time_type)overflows << timer_type::value_bits) | postval;
-			}
+			if (new_time >= time)
+				return ((time_type)overflows << timer_type::value_bits) | new_time;
 
-			tov_interrupt();
-			timer_type::clear_overflow();
+			time = new_time;
 		}
 	}
 
