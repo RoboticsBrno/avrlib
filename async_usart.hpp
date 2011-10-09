@@ -19,7 +19,6 @@ public:
 	typedef Bootseq bootseq_type;
 
 	async_usart()
-		: m_overflows(0)
 	{
 	}
 
@@ -83,14 +82,14 @@ public:
 
 	void process_rx()
 	{
-		if (m_usart.rx_empty())
-			return;
+		if (!m_usart.rx_empty())
+			this->intr_rx();
+	}
 
-		if (m_usart.overflow())
-			++m_overflows;
+	void intr_rx()
+	{
 		value_type v = m_bootseq.check(m_usart.recv());
-		if (!m_rx_buffer.full())
-			m_rx_buffer.push(v);
+		m_rx_buffer.push(v);
 	}
 
 	void process_tx()
@@ -107,8 +106,6 @@ public:
 	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
 	rx_buffer_type & rx_buffer() { return m_rx_buffer; }
 
-	overflow_type overflows() const { return m_overflows; }
-
 	usart_type & usart() { return m_usart; }
 	usart_type const & usart() const { return m_usart; }
 
@@ -117,8 +114,6 @@ private:
 	buffer<value_type, RxBufferSize> m_rx_buffer;
 	buffer<value_type, TxBufferSize> m_tx_buffer;
 	bootseq_type m_bootseq;
-
-	overflow_type m_overflows;
 };
 
 }
