@@ -6,15 +6,18 @@
 
 namespace avrlib {
 
-template <typename T, uint_max_t Capacity>
-class buffer
+namespace detail {
+
+template <typename T, uint_max_t Capacity, typename Parent>
+class buffer_base
+	: private Parent
 {
 public:
 	typedef typename least_uint<Capacity + 1>::type index_type;
 	typedef T value_type;
 	static const index_type capacity = Capacity;
 
-	buffer()
+	buffer_base()
 		: m_wptr(0), m_rptr(0)
 	{
 	}
@@ -36,8 +39,9 @@ public:
 
 	void push(value_type v)
 	{
-		m_buffer[m_wptr] = v;
-		m_wptr = next(m_wptr);
+		index_type wptr = m_wptr;
+		m_buffer[wptr] = v;
+		m_wptr = next(wptr);
 	}
 
 	value_type top() const
@@ -109,24 +113,61 @@ private:
 	volatile value_type m_buffer[capacity];
 	volatile index_type m_wptr;
 	volatile index_type m_rptr;
+};
+
+template <uint_max_t Capacity, bool roundCapacity>
+class buffer_impl
+{
+protected:
+	typedef typename least_uint<Capacity + 1>::type index_type;
 
 	static index_type next(index_type v)
 	{
 		index_type res = v + 1;
-		if (res == capacity)
+		if (res == Capacity)
 			res = 0;
 		return res;
 	}
 
 	static index_type next(index_type v, index_type len)
 	{
-		return index_type(capacity - v) <= len? len - index_type(capacity - v): v + len;
+		return index_type(Capacity - v) <= len? len - index_type(Capacity - v): v + len;
 	}
 
 	static index_type dist(index_type ptr, index_type base)
 	{
-		return ptr >= base? ptr - base: ptr + index_type(capacity - base);
+		return ptr >= base? ptr - base: ptr + index_type(Capacity - base);
 	}
+};
+
+template <uint_max_t Capacity>
+class buffer_impl<Capacity, true>
+{
+protected:
+	typedef typename least_uint<Capacity + 1>::type index_type;
+
+	static index_type next(index_type v)
+	{
+		return index_type(v + 1) % Capacity;
+	}
+
+	static index_type next(index_type v, index_type len)
+	{
+		return index_type(v + len) % Capacity;
+	}
+
+	static index_type dist(index_type ptr, index_type base)
+	{
+		return index_type(ptr - base) % Capacity;
+	}
+};
+
+}
+
+template <typename T, uint_max_t Capacity>
+class buffer
+	: public detail::buffer_base<T, Capacity, detail::buffer_impl<Capacity, (Capacity & (Capacity-1)) == 0> >
+{	
 };
 
 }
