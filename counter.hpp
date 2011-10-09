@@ -12,6 +12,11 @@ struct counter
 	typedef Timer timer_type;
 	typedef Time time_type;
 
+	template <uint32_t v>
+	struct us : timer_type::template us<v>
+	{
+	};
+
 	counter()
 		: m_overflows(0)
 	{
@@ -45,13 +50,18 @@ struct counter
 
 	time_type value() const
 	{
-		uint16_t time = timer_type::value();
+		typename timer_type::time_type time = timer_type::value();
 		uint16_t overflows;
 
 		for (;;)
 		{
+			// This is needed for correctness in the case of interrupt congestion.
+			// Perhaps we could afford to cli, process and sei, but that would screw up
+			// interrupt priorities.
+			while (timer_type::overflow()) {}
+
 			overflows = static_cast<uint16_t volatile const &>(m_overflows);
-			uint16_t new_time = timer_type::value();
+			typename timer_type::time_type new_time = timer_type::value();
 
 			if (new_time >= time)
 				return ((time_type)overflows << timer_type::value_bits) | new_time;
