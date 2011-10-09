@@ -16,19 +16,10 @@ public:
 	{
 	}
 
-	void open(USART_t & p, bool rx_interrupt = false, bool synchronous = false)
+	void open(USART_t & p, uint16_t baudrate, bool rx_interrupt = false, bool synchronous = false)
 	{
 		m_p = &p;
-		if (synchronous)
-		{
-			m_p->BAUDCTRLA = (uint8_t)416;
-			m_p->BAUDCTRLB = (uint8_t)(416 >> 8);
-		}
-		else
-		{
-			m_p->BAUDCTRLA = 102;
-			m_p->BAUDCTRLB = (-1<<USART_BSCALE_gp);
-		}
+		this->set_speed(baudrate);
 		if (rx_interrupt)
 			m_p->CTRLA = USART_RXCINTLVL_MED_gc;
 		else
@@ -43,6 +34,12 @@ public:
 		m_p->CTRLA = 0;
 		m_p->CTRLB = 0;
 		m_p->CTRLC = USART_CMODE_ASYNCHRONOUS_gc | (3<<USART_CHSIZE_gp);
+	}
+
+	void set_speed(uint16_t baudrate)
+	{
+		m_p->BAUDCTRLA = (uint8_t)(baudrate);
+		m_p->BAUDCTRLB = (uint8_t)(baudrate >> 8);
 	}
 
 	void send(value_type v)
