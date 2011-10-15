@@ -1,5 +1,5 @@
-#ifndef AVRLIB_USART_XD1_HPP
-#define AVRLIB_USART_XD1_HPP
+#ifndef AVRLIB_USART_XMEGA_HPP
+#define AVRLIB_USART_XMEGA_HPP
 
 #include <avr/io.h>
 #include <stdint.h>
