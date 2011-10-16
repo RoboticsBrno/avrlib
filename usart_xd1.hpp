@@ -48,6 +48,11 @@ public:
 		USARTD1.CTRLA = (USARTD1.CTRLA & ~(USART_DREINTLVL_gm)) | (prio<<USART_DREINTLVL_gp);
 	}
 
+	void rx_intr(intr_prio_t prio)
+	{
+		USARTD1.CTRLA = (USARTD1.CTRLA & ~(USART_RXCINTLVL_gm)) | (prio<<USART_RXCINTLVL_gp);
+	}
+
 	bool overflow() const
 	{
 		return (USARTD1.STATUS & USART_BUFOVF_bm) != 0;
