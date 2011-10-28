@@ -22,6 +22,18 @@ public:
 	{
 	}
 
+	template <typename T1>
+	async_usart(T1 const & t1)
+	{
+		m_usart.open(t1);
+	}
+
+	template <typename T1, typename T2>
+	async_usart(T1 const & t1, T2 const & t2)
+	{
+		m_usart.open(t1, t2);
+	}
+
 	bool empty() const
 	{
 		return m_rx_buffer.empty();
