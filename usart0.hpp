@@ -11,7 +11,21 @@ class usart0
 public:
 	typedef uint8_t value_type;
 
+	usart0()
+	{
+	}
+
 	usart0(uint16_t ubrr, bool rx_interrupt)
+	{
+		this->open(ubrr, rx_interrupt);
+	}
+
+	~usart0()
+	{
+		this->close();
+	}
+
+	void open(uint16_t ubrr, bool rx_interrupt)
 	{
 		UBRR0H = ubrr >> 8;
 		UBRR0L = ubrr & 0xFF;
@@ -22,7 +36,7 @@ public:
 			UCSR0B |= (1<<RXCIE0);
 	}
 
-	~usart0()
+	void close()
 	{
 		UCSR0B = 0;
 	}
