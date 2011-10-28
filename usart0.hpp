@@ -17,7 +17,7 @@ public:
 
 	usart0(uint16_t ubrr, bool rx_interrupt)
 	{
-		this->open(ubrr, rx_interrupt);
+		this->open_ubrr(ubrr, rx_interrupt);
 	}
 
 	~usart0()
