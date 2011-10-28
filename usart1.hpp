@@ -16,7 +16,11 @@ public:
 	void open(uint32_t speed, bool rx_interrupt)
 	{
 		uint16_t ubrr = detail::get_ubrr(speed);
+		this->open_ubrr(ubrr, rx_interrupt);
+	}
 
+	void open_ubrr(uint16_t ubrr, bool rx_interrupt)
+	{
 		UBRR1H = ubrr >> 8;
 		UBRR1L = ubrr & 0xFF;
 		UCSR1A = (1<<U2X1);
@@ -26,6 +30,7 @@ public:
 			UCSR1B |= (1<<RXCIE1);
 	}
 
+#ifdef UMSEL10
 	void open_sync_slave(bool rx_interrupt)
 	{
 		UCSR1C = (1<<UMSEL10)|(1<<UCSZ11)|(1<<UCSZ10);
@@ -34,6 +39,7 @@ public:
 		if (rx_interrupt)
 			UCSR1B |= (1<<RXCIE1);
 	}
+#endif
 
 	void close()
 	{

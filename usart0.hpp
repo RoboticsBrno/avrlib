@@ -25,7 +25,7 @@ public:
 		this->close();
 	}
 
-	void open(uint16_t ubrr, bool rx_interrupt)
+	void open_ubrr(uint16_t ubrr, bool rx_interrupt)
 	{
 		UBRR0H = ubrr >> 8;
 		UBRR0L = ubrr & 0xFF;
