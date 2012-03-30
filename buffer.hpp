@@ -109,6 +109,16 @@ public:
 		m_rptr = next(m_rptr, len);
 	}
 
+	bool try_pop(value_type & v)
+	{
+		index_type rptr = m_rptr;
+		if (m_wptr == rptr)
+			return false;
+		v = m_buffer[rptr];
+		m_rptr = next(rptr);
+		return true;
+	}
+
 private:
 	volatile value_type m_buffer[capacity];
 	volatile index_type m_wptr;
