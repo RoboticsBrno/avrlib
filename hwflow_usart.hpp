@@ -78,7 +78,7 @@ public:
 
 	void process_tx()
 	{
-		if (!m_tx_buffer.empty() && m_usart.tx_empty() && !PinCts::get_value())
+		if (!m_tx_buffer.empty() && m_usart.tx_empty() && !PinCts::read())
 		{
 			m_usart.send(m_tx_buffer.top());
 			m_tx_buffer.pop();
