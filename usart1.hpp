@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "usart_base.hpp"
+#include "intr_prio.hpp"
 
 namespace avrlib {
 
@@ -28,6 +29,14 @@ public:
 
 		if (rx_interrupt)
 			UCSR1B |= (1<<RXCIE1);
+	}
+
+	void rx_intr(intr_prio_t prio)
+	{
+		if (prio)
+			UCSR1B |= (1<<RXCIE1);
+		else
+			UCSR1B &= ~(1<<RXCIE1);
 	}
 
 #ifdef UMSEL10
