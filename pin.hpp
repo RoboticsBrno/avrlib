@@ -34,6 +34,9 @@ struct pin
 	static void make_low() { clear(); output(true); }
 	static void make_high() { set(); output(true); }
 	static void set_value(bool value) { set(value); }
+	static void set_high() { set(true); }
+	static void set_low() { set(false); }
+	static bool read() { return value(); }
 };
 
 }
