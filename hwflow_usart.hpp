@@ -87,7 +87,7 @@ public:
 
 	bool tx_reserve(uint8_t size)
 	{
-		return TxBufferSize - m_tx_buffer.size() >= size;
+		return TxBufferSize - m_tx_buffer.size() > size;
 	}
 
 	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
