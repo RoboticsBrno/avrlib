@@ -2,7 +2,6 @@
 #define AVRLIB_HWFLOW_USART_HPP
 
 #include <stdint.h>
-#include "usart_base.hpp"
 #include "buffer.hpp"
 #include "intr_prio.hpp"
 
