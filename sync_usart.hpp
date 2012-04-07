@@ -2,7 +2,6 @@
 #define AVRLIB_SYNC_USART_HPP
 
 #include <stdint.h>
-#include "usart_base.hpp"
 #include "nobootseq.hpp"
 
 namespace avrlib {

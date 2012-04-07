@@ -2,7 +2,6 @@
 #define AVRLIB_ASYNC_USART_HPP
 
 #include <stdint.h>
-#include "usart_base.hpp"
 #include "nobootseq.hpp"
 #include "buffer.hpp"
 
