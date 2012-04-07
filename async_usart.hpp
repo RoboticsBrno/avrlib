@@ -115,6 +115,11 @@ public:
 		// TODO: flush the underlying port
 	}
 
+	bool tx_reserve(uint8_t size)
+	{
+		return TxBufferSize - m_tx_buffer.size() >= size;
+	}
+
 	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
 	rx_buffer_type & rx_buffer() { return m_rx_buffer; }
 
