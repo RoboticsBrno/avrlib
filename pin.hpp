@@ -37,6 +37,7 @@ struct pin
 	static void set_high() { set(true); }
 	static void set_low() { set(false); }
 	static bool read() { return value(); }
+	static void pullup() { set_high(); }
 };
 
 }
