@@ -49,6 +49,11 @@ public:
 		return m_rx_buffer.size();
 	}
 
+	uint8_t operator[](uint8_t index) const
+	{
+		return m_rx_buffer[index];
+	}
+
 	void write(value_type v)
 	{
 		while (m_tx_buffer.full())
