@@ -17,10 +17,10 @@ public:
 	void open(uint32_t speed, bool rx_interrupt)
 	{
 		uint16_t ubrr = detail::get_ubrr(speed);
-		this->open_ubrr(ubrr, rx_interrupt);
+		this->open(ubrr, rx_interrupt);
 	}
 
-	void open_ubrr(uint16_t ubrr, bool rx_interrupt)
+	void open(uint16_t ubrr, bool rx_interrupt)
 	{
 		UBRR1H = ubrr >> 8;
 		UBRR1L = ubrr & 0xFF;
