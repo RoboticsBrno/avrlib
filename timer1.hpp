@@ -20,9 +20,9 @@ namespace avrlib {
 
 struct timer1
 {
-	typedef uint16_t value_type;
-	typedef uint16_t time_type;
-	static const uint8_t value_bits = 16;
+	typedef timer_16b_value_type value_type;
+	typedef value_type time_type;
+	static volatile uint8_t value_bits;
 
 	static value_type value()
 	{
@@ -46,6 +46,45 @@ struct timer1
 	{
 		TCCR1A = (TCCR1A & ~0x03) | (v & 0x03);
 		TCCR1B = (TCCR1B & ~0x18) | ((v & 0x0c) << 1);
+		if((v & (1<<3)) != 0)
+		{
+			if((v & (1<<0)) == 0)
+			top_value = (volatile value_type*)(&ICR3);
+			else
+			top_value = (volatile value_type*)(&OCR3A);
+		}
+		else if (v == 4)
+		{
+			top_value = (volatile value_type*)(&OCR3A);
+		}
+		else
+		{
+			switch (v&3)
+			{
+			case 0:
+				top_value = (volatile value_type*)(&timer_top_16b);
+				value_bits = 16;
+				break;
+			case 1:
+				top_value = (volatile value_type*)(&timer_top_8b);
+				value_bits = 8;
+				break;
+			case 2:
+				top_value = (volatile value_type*)(&timer_top_9b);
+				value_bits = 9;
+				break;
+			case 3:
+				top_value = (volatile value_type*)(&timer_top_10b);
+				value_bits = 10;
+				break;
+			}
+			
+		}
+	}
+	
+	static value_type top()
+	{
+		return *top_value;
 	}
 
 	struct ocra
@@ -88,6 +127,8 @@ struct timer1
 		static void mode(timer_ocr_mode v) { TCCR1A = (TCCR1A & 0xf3) | (v << 2); }
 		static void value(value_type v) { OCR1C = v; }
 		static value_type value() { return OCR1C; }
+			
+#ifdef __AVR_ATmega128__
 		static void interrupt(bool enable)
 		{
 			if (enable)
@@ -98,6 +139,18 @@ struct timer1
 			else
 				TIMSK1 &= (1<<OCIE1C);
 		}
+#else
+		static void interrupt(bool enable)
+		{
+			if (enable)
+			{
+				ETIFR = (1<<OCF1C);
+				ETIMSK |= (1<<OCIE1C);
+			}
+			else
+				ETIMSK &= (1<<OCIE1C);
+		}
+#endif
 	};
 #endif
 
@@ -158,7 +211,13 @@ struct timer1
 	{
 		TIFR1 = (1<<TOV1);
 	}
+	
+private:
+	static volatile value_type* top_value;
 };
+
+volatile uint8_t timer1::value_bits = 16;
+volatile timer1::value_type* timer1::top_value = (volatile timer1::value_type*)(&timer_top_16b);
 
 }
 

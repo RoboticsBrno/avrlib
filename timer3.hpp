@@ -5,11 +5,23 @@
 #include "timer_base.hpp"
 
 namespace avrlib {
+	
+#ifndef TIFR3
+#define TIFR3 ETIFR
+#endif
+#ifndef TIMSK3
+#define TIMSK3 ETIMSK
+#endif
+
+#ifndef ICIE3
+# define ICIE3 TICIE3
+#endif
 
 struct timer3
 {
-	typedef uint16_t value_type;
-	static const uint8_t value_bits = 16;
+	typedef timer_16b_value_type value_type;
+	typedef value_type time_type;
+	static volatile uint8_t value_bits;
 
 	static value_type value()
 	{
@@ -33,6 +45,44 @@ struct timer3
 	{
 		TCCR3A = (TCCR3A & ~0x03) | (v & 0x03);
 		TCCR3B = (TCCR3B & ~0x18) | ((v & 0x0c) << 1);
+		if((v & (1<<3)) != 0)
+		{
+			if((v & (1<<0)) == 0)
+				top_value = (volatile value_type*)(&ICR3);
+			else
+				top_value = (volatile value_type*)(&OCR3A);
+		}
+		else if (v == 4)
+		{
+			top_value = (volatile value_type*)(&OCR3A);
+		}			
+		else
+		{
+			switch (v&3)
+			{
+			case 0:
+				top_value = (volatile value_type*)(&timer_top_16b);
+				value_bits = 16;
+			break;
+			case 1:
+				top_value = (volatile value_type*)(&timer_top_8b);
+				value_bits = 8;
+				break;
+			case 2:
+				top_value = (volatile value_type*)(&timer_top_9b);
+				value_bits = 9;
+				break;
+			case 3:
+				top_value = (volatile value_type*)(&timer_top_10b);
+				value_bits = 10;
+				break;
+			}
+		}
+	}
+	
+	static value_type top()
+	{
+		return *top_value;
 	}
 
 	struct ocra
@@ -71,6 +121,7 @@ struct timer3
 		}
 	};
 
+#ifdef OCR3C
 	struct ocrc
 	{
 		typedef uint16_t value_type;
@@ -88,8 +139,46 @@ struct timer3
 				TIMSK3 &= (1<<OCIE3C);
 		}
 	};
+#endif
 
-	static uint8_t tov_interrupt(bool v)
+	struct icr
+	{
+		static void value(value_type v) { ICR3 = v; }
+		static value_type value() { return ICR3; }
+
+		static void rising_edge(bool enable)
+		{
+			TCCR3B = (TCCR3B & ~(1<<ICES3)) | (enable? (1<<ICES3): 0);
+		}
+
+		static void noise_canceler(bool enable)
+		{
+			TCCR3B = (TCCR3B & ~(1<<ICNC3)) | (enable? (1<<ICNC3): 0);
+		}
+
+		static void interrupt(bool enable)
+		{
+			if (enable)
+			{
+				TIFR3 = (1<<ICF3);
+				TIMSK3 |= (1<<ICIE3);
+			}
+			else
+				TIMSK3 &= (1<<ICIE3);
+		}
+
+		static bool captured()
+		{
+			return TIFR3 & (1<<ICF3);
+		}
+
+		static void clear_captured()
+		{
+			TIFR3 = (1<<ICF3);
+		}
+	};
+
+	static void tov_interrupt(bool v)
 	{
 		if (v)
 		{
@@ -109,7 +198,13 @@ struct timer3
 	{
 		TIFR3 = (1<<TOV3);
 	}
+	
+private:
+	static volatile value_type* top_value;
 };
+
+volatile uint8_t timer3::value_bits = 16;
+volatile timer3::value_type* timer3::top_value = (volatile timer3::value_type*)(&timer_top_16b);
 
 }
 

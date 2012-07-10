@@ -6,7 +6,7 @@
 
 namespace avrlib {
 
-template <typename Timer, typename Time = uint32_t>
+template <typename Timer, typename Time = uint32_t, bool full_bit_period = true>
 struct counter
 {
 	typedef Timer timer_type;
@@ -64,7 +64,12 @@ struct counter
 			typename timer_type::time_type new_time = timer_type::value();
 
 			if (new_time >= time)
-				return ((time_type)overflows << timer_type::value_bits) | new_time;
+			{
+				if(full_bit_period)
+					return ((time_type)overflows << timer_type::value_bits) | new_time;
+				else
+					return ((time_type)overflows * timer_type::top()) + new_time;
+			}				
 
 			time = new_time;
 		}
