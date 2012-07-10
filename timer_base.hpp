@@ -43,6 +43,13 @@ enum timer_ocr_mode
 	timer_ocr_mode_negative = 3,
 };
 
+typedef uint16_t timer_16b_value_type;
+
+static const timer_16b_value_type timer_top_8b  = 0x00FF;
+static const timer_16b_value_type timer_top_9b  = 0x01FF;
+static const timer_16b_value_type timer_top_10b = 0x03FF;
+static const timer_16b_value_type timer_top_16b = 0xFFFF;
+
 }
 
 #endif
