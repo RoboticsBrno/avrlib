@@ -49,13 +49,13 @@ struct timer1
 		if((v & (1<<3)) != 0)
 		{
 			if((v & (1<<0)) == 0)
-			top_value = (volatile value_type*)(&ICR3);
+			top_value = (volatile value_type*)(&ICR1);
 			else
-			top_value = (volatile value_type*)(&OCR3A);
+			top_value = (volatile value_type*)(&OCR1A);
 		}
 		else if (v == 4)
 		{
-			top_value = (volatile value_type*)(&OCR3A);
+			top_value = (volatile value_type*)(&OCR1A);
 		}
 		else
 		{
