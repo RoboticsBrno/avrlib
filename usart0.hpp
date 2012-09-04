@@ -4,6 +4,9 @@
 #include <avr/io.h>
 #include <stdint.h>
 
+#include "usart_base.hpp"
+#include "intr_prio.hpp"
+
 namespace avrlib {
 
 class usart0
@@ -15,9 +18,14 @@ public:
 	{
 	}
 
-	usart0(uint16_t ubrr, bool rx_interrupt)
+	usart0(uint16_t ubrr, bool rx_interrupt = false)
 	{
 		this->open(ubrr, rx_interrupt);
+	}
+	
+	usart0(uint32_t speed, bool rx_interrupt = false)
+	{
+		this->open(speed, rx_interrupt);
 	}
 
 	~usart0()
@@ -25,7 +33,13 @@ public:
 		this->close();
 	}
 
-	void open(uint16_t ubrr, bool rx_interrupt)
+	void open(uint32_t speed, bool rx_interrupt = false)
+	{
+		uint16_t ubrr = detail::get_ubrr(speed);
+		this->open(ubrr, rx_interrupt);
+	}
+	
+	void open(uint16_t ubrr, bool rx_interrupt = false)
 	{
 		UBRR0H = ubrr >> 8;
 		UBRR0L = ubrr & 0xFF;
@@ -35,6 +49,25 @@ public:
 		if (rx_interrupt)
 			UCSR0B |= (1<<RXCIE0);
 	}
+	
+	void rx_intr(intr_prio_t prio)
+	{
+		if (prio)
+			UCSR0B |= (1<<RXCIE0);
+		else
+			UCSR0B &= ~(1<<RXCIE0);
+	}
+
+#ifdef UMSEL00
+	void open_sync_slave(bool rx_interrupt)
+	{
+		UCSR0C = (1<<UMSEL00)|(1<<UCSZ01)|(1<<UCSZ00);
+		UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+
+		if (rx_interrupt)
+			UCSR0B |= (1<<RXCIE0);
+	}
+#endif
 
 	void close()
 	{
