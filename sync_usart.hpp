@@ -15,9 +15,20 @@ public:
 
 	typedef Bootseq bootseq_type;
 
-	explicit sync_usart(uint32_t speed, bool rx_interrupt = false)
-		: m_usart(detail::get_ubrr(speed), rx_interrupt)
+	sync_usart()
 	{
+	}
+
+	template <typename T1>
+	sync_usart(T1 const & t1)
+	{
+		m_usart.open(t1);
+	}
+
+	template <typename T1, typename T2>
+	sync_usart(T1 const & t1, T2 const & t2)
+	{
+		m_usart.open(t1, t2);
 	}
 
 	bool empty() const

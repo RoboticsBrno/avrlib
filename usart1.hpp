@@ -13,14 +13,33 @@ class usart1
 {
 public:
 	typedef uint8_t value_type;
+	
+	usart1()
+	{
+	}
 
-	void open(uint32_t speed, bool rx_interrupt)
+	usart1(uint16_t ubrr, bool rx_interrupt = false)
+	{
+		this->open(ubrr, rx_interrupt);
+	}
+	
+	usart1(uint32_t speed, bool rx_interrupt = false)
+	{
+		this->open(speed, rx_interrupt);
+	}
+
+	~usart1()
+	{
+		this->close();
+	}
+
+	void open(uint32_t speed, bool rx_interrupt = false)
 	{
 		uint16_t ubrr = detail::get_ubrr(speed);
 		this->open(ubrr, rx_interrupt);
 	}
 
-	void open(uint16_t ubrr, bool rx_interrupt)
+	void open(uint16_t ubrr, bool rx_interrupt = false)
 	{
 		UBRR1H = ubrr >> 8;
 		UBRR1L = ubrr & 0xFF;
