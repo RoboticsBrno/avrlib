@@ -249,7 +249,7 @@ private:
 class pgm_literal_range
 {
 public:
-	pgm_literal_range(prog_char const * first, prog_char const * last)
+	pgm_literal_range(char const * first, char const * last)
 		: m_first(first), m_last(last)
 	{
 	}
@@ -270,8 +270,8 @@ public:
 	}
 
 private:
-	prog_char const * m_first;
-	prog_char const * m_last;
+	char const * m_first;
+	char const * m_last;
 };
 
 template <typename Stream>
@@ -281,7 +281,7 @@ format_impl<Stream, string_literal_range> format(Stream & out, char const * patt
 }
 
 template <typename Stream, int N>
-format_impl<Stream, pgm_literal_range> format_pgm(Stream & out, prog_char const (&pattern)[N])
+format_impl<Stream, pgm_literal_range> format_pgm(Stream & out, char const (&pattern)[N])
 {
 	return format_impl<Stream, pgm_literal_range>(out, pgm_literal_range(pattern, pattern + N - 1));
 }
