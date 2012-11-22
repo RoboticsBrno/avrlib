@@ -89,6 +89,7 @@ struct timer3
 	{
 		typedef uint16_t value_type;
 		static void mode(timer_ocr_mode v) { TCCR3A = (TCCR3A & 0x3f) | (v << 6); }
+		static timer_ocr_mode mode() { return (TCCR3A & ~0x3f) >> 6; }
 		static void value(value_type v) { OCR3A = v; }
 		static value_type value() { return OCR3A; }
 		static void interrupt(bool enable)
@@ -107,6 +108,7 @@ struct timer3
 	{
 		typedef uint16_t value_type;
 		static void mode(timer_ocr_mode v) { TCCR3A = (TCCR3A & 0xcf) | (v << 4); }
+		static timer_ocr_mode mode() { return (TCCR3A & ~0xcf) >> 6; }
 		static void value(value_type v) { OCR3B = v; }
 		static value_type value() { return OCR3B; }
 		static void interrupt(bool enable)
@@ -126,6 +128,7 @@ struct timer3
 	{
 		typedef uint16_t value_type;
 		static void mode(timer_ocr_mode v) { TCCR3A = (TCCR3A & 0xf3) | (v << 2); }
+		static timer_ocr_mode mode() { return (TCCR3A & ~0xf3) >> 6; }
 		static void value(value_type v) { OCR3C = v; }
 		static value_type value() { return OCR3C; }
 		static void interrupt(bool enable)
