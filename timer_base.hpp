@@ -15,6 +15,11 @@ enum timer_clock_source
 	timer_ext_rising = 7,
 };
 
+static const uint16_t timer_clock_prescaler_values [] = 
+{
+	0, 1, 8, 64, 256, 1024, -1, -1
+};
+
 enum timer_mode
 {
 	timer_mode_normal,

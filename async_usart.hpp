@@ -69,14 +69,27 @@ public:
 
 	void write(value_type v)
 	{
-		while (m_tx_buffer.full())
+		if(TxBufferSize != 0)
 		{
-			cli();
-			this->process_tx();
-			sei();
-		}
+			while (m_tx_buffer.full())
+			{
+				cli();
+				this->process_tx();
+				sei();
+			}
 
-		m_tx_buffer.push(v);
+			m_tx_buffer.push(v);
+		}
+		else
+		{
+			while(!m_usart.tx_empty())
+			{
+				cli();
+				__asm__ volatile ("nop");
+				sei();
+			}
+			m_usart.send(v);
+		}		
 	}
 	
 	void flush()
@@ -128,7 +141,7 @@ public:
 private:
 	usart_type m_usart;
 	buffer<value_type, RxBufferSize> m_rx_buffer;
-	buffer<value_type, TxBufferSize> m_tx_buffer;
+	buffer<value_type, TxBufferSize==0?1:TxBufferSize> m_tx_buffer;
 	bootseq_type m_bootseq;
 };
 

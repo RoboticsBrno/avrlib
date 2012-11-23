@@ -172,6 +172,17 @@ public:
 		return *this;
 	}
 
+#ifdef AVRLIB_STRING_HPP	
+	format_impl & operator%(const string& str)
+	{
+		for(string::size_t i = 0; i != str.size(); ++i)
+			m_out.write(str[i]);
+		m_pattern.pop();
+		this->write_literal();
+		return *this;
+	}
+#endif
+
 	template <typename T>
 	format_impl & operator%(T const & t)
 	{
