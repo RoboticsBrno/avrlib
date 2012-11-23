@@ -41,6 +41,8 @@ struct timer1
 	{
 		TCCR1B = (TCCR1B & 0xf8) | v;
 	}
+	
+	static uint8_t clock_source() { return TCCR1B & 0x07; }
 
 	static void mode(timer_mode v)
 	{
@@ -90,7 +92,7 @@ struct timer1
 	struct ocra
 	{
 		static void mode(timer_ocr_mode v) { TCCR1A = (TCCR1A & 0x3f) | (v << 6); }
-		static timer_ocr_mode mode() { return (TCCR1A & ~0x3f) >> 6; }
+		static uint8_t mode() { return (TCCR1A & ~0x3f) >> 6; }
 		static void value(value_type v) { OCR1A = v; }
 		static value_type value() { return OCR1A; }
 		static void interrupt(bool enable)
@@ -108,7 +110,7 @@ struct timer1
 	struct ocrb
 	{
 		static void mode(timer_ocr_mode v) { TCCR1A = (TCCR1A & 0xcf) | (v << 4); }
-		static timer_ocr_mode mode() { return (TCCR1A & ~0xCf) >> 4; }
+		static uint8_t mode() { return (TCCR1A & ~0xCf) >> 4; }
 		static void value(value_type v) { OCR1B = v; }
 		static value_type value() { return OCR1B; }
 		static void interrupt(bool enable)
@@ -127,7 +129,7 @@ struct timer1
 	struct ocrc
 	{
 		static void mode(timer_ocr_mode v) { TCCR1A = (TCCR1A & 0xf3) | (v << 2); }
-		static timer_ocr_mode mode() { return (TCCR1A & ~0xf3) >> 2; }
+		static uint8_t mode() { return (TCCR1A & ~0xf3) >> 2; }
 		static void value(value_type v) { OCR1C = v; }
 		static value_type value() { return OCR1C; }
 			
