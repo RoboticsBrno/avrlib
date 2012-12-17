@@ -1,6 +1,8 @@
 #ifndef AVRLIB_MEMORY_STREAM_HPP
 #define AVRLIB_MEMORY_STREAM_HPP
 
+#include "numeric.hpp"
+
 namespace avrlib {
 
 template <uint_max_t RxCapacity, uint_max_t TxCapacity>
