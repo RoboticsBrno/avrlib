@@ -63,16 +63,35 @@ class stopwatch
 public:
 	typedef typename Timer::time_type time_type;
 
+	stopwatch()
+		: m_timer(0), m_running(false)
+	{
+	}
+
 	explicit stopwatch(Timer const & timer)
-		: m_timer(timer), m_running(true)
+		: m_timer(&timer), m_running(true)
 	{
 		this->clear();
+	}
+
+	void init(Timer const & timer)
+	{
+		m_timer = &timer;
+		m_running = true;
+		m_base = m_timer->value();
+	}
+
+	void init_stopped(Timer const & timer)
+	{
+		m_timer = &timer;
+		m_running = false;
+		m_base = 0;
 	}
 
 	void clear()
 	{
 		if (m_running)
-			m_base = m_timer.value();
+			m_base = m_timer->value();
 		else
 			m_base = 0;
 	}
@@ -86,14 +105,14 @@ public:
 	void restart()
 	{
 		m_running = true;
-		m_base = m_timer.value();
+		m_base = m_timer->value();
 	}
 
 	void start()
 	{
 		if (!m_running)
 		{
-			m_base = m_timer.value() - m_base;
+			m_base = m_timer->value() - m_base;
 			m_running = true;
 		}
 	}
@@ -102,7 +121,7 @@ public:
 	{
 		if (m_running)
 		{
-			m_base = m_timer.value() - m_base;
+			m_base = m_timer->value() - m_base;
 			m_running = false;
 		}
 	}
@@ -110,7 +129,7 @@ public:
 	time_type operator()() const
 	{
 		if (m_running)
-			return m_timer.value() - m_base;
+			return m_timer->value() - m_base;
 		else
 			return m_base;
 	}
@@ -118,7 +137,7 @@ public:
 	void set(time_type value)
 	{
 		if (m_running)
-			m_base = m_timer.value() - value;
+			m_base = m_timer->value() - value;
 		else
 			m_base = value;
 	}
@@ -132,7 +151,7 @@ public:
 	}
 
 private:
-	Timer const & m_timer;
+	Timer const * m_timer;
 	volatile bool m_running;
 	volatile time_type m_base;
 };
@@ -145,9 +164,25 @@ public:
 	typedef stopwatch<Timer> base_type;
 	typedef typename base_type::time_type time_type;
 
+	timeout()
+	{
+	}
+
 	timeout(Timer const & timer, time_type timeout)
 		: stopwatch<Timer>(timer), m_timeout(timeout)
 	{
+	}
+
+	void init(Timer const & timer, time_type timeout)
+	{
+		stopwatch<Timer>::init(timer);
+		m_timeout = timeout;
+	}
+
+	void init_stopped(Timer const & timer, time_type timeout)
+	{
+		stopwatch<Timer>::init_stopped(timer);
+		m_timeout = timeout;
 	}
 
 	void force()
