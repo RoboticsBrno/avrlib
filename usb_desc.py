@@ -93,7 +93,21 @@ def CdcCallManagementDescriptor(bmCapabilities, bDataInterface):
 def CdcAcmDescriptor(bmCapabilities):
     return pack('<BBBB', 4, DescriptorType.CS_INTERFACE, 0x02, bmCapabilities)
 
+def CustomDescriptor(desc_type, data):
+    chunks = []
+    while data:
+        chunk = data[:253]
+        data = data[253:]
+        chunks.append(pack('<BB', len(chunk) + 2, desc_type))
+        chunks.append(chunk)
+    return ''.join(chunks)
+
 def print_descriptors(fout, descriptors):
+    if 'comment' in descriptors:
+        log = descriptors['comment']
+        log = '// ' + '\n// '.join(log) + '\n\n'
+        fout.write(log)
+
     fout.write('''\
 struct usb_descriptor_entry_t
 {
@@ -106,6 +120,9 @@ static usb_descriptor_entry_t const usb_descriptor_map[] = {
 ''')
     data = ''
     for key, value in sorted(descriptors.iteritems()):
+        if not isinstance(key, int):
+            continue
+
         oldlen = len(data)
         data += value
         fout.write('    { 0x%03x, 0x%03x, 0x%03x }, // %d\n' % (key, oldlen, len(data) - oldlen, len(data) - oldlen))
