@@ -53,10 +53,14 @@ def DeviceDescriptor(bcdUSB=None, bDeviceClass=None, bDeviceSubClass=None, bDevi
 
 def ConfigurationDescriptor(bConfigurationValue=None, iConfiguration=0,
         bmAttributes=None, bMaxPower=None, interfaces=None):
+    if interfaces:
+        intf_count = max((ord(intf[2]) for intf in interfaces)) + 1
+    else:
+        intf_count = 0
     res = pack('<BBHBBBBB',
         9, DescriptorType.CONFIGURATION,
         9 + sum((len(intf) for intf in interfaces)),
-        len(interfaces),
+        intf_count,
         bConfigurationValue, iConfiguration, bmAttributes, bMaxPower)
     return res + ''.join(interfaces)
 
