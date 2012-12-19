@@ -11,7 +11,7 @@ class usart_xc1
 public:
 	typedef uint8_t value_type;
 
-	void open(uint16_t baudrate, bool rx_interrupt = false, bool synchronous = false)
+	void open(uint16_t baudrate, bool rx_interrupt = false, bool synchronous = false, bool dbl = false)
 	{
 		this->set_speed(baudrate);
 		if (rx_interrupt)
@@ -20,7 +20,7 @@ public:
 			USARTC1.CTRLA = 0;
 		USARTC1.CTRLC = (synchronous? USART_CMODE_SYNCHRONOUS_gc: USART_CMODE_ASYNCHRONOUS_gc)
 			| (3<<USART_CHSIZE_gp);
-		USARTC1.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
+		USARTC1.CTRLB = USART_RXEN_bm | USART_TXEN_bm | (dbl? USART_CLK2X_bm: 0);
 	}
 
 	void close()
