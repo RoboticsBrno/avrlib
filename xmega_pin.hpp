@@ -23,6 +23,95 @@
 		static void totem() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_TOTEM_gc; } \
 		static bool read() { return (port##_IN & (1<<(pin))) != 0; } \
 		static void pinctrl(uint8_t v) { port##_PIN##pin##CTRL = v; } \
+		static void make_inverted() { port##_PIN##pin##CTRL |= PORT_INVEN_bm; } \
+		static void make_noninverted() { port##_PIN##pin##CTRL &= ~PORT_INVEN_bm; } \
 	}
+
+template <typename PinHigh, typename PinLow>
+struct pin_totem_drive
+{
+	static void make_input() { PinHigh::set_low(); PinLow::set_low(); }
+	static void make_high() { PinLow::set_low(); PinHigh::set_high(); }
+	static void make_low() { PinHigh::set_low(); PinLow::set_high(); }
+	static void set_value(uint8_t value) { if (value) set_high(); else set_low(); }
+	static void set_high() { PinLow::set_low(); PinHigh::set_high(); }
+	static void set_low() { PinHigh::set_low(); PinLow::set_high(); }
+};
+
+template <typename ValuePin, typename OePin>
+struct pin_buffer_with_oe
+{
+	static void init()
+	{
+		ValuePin::make_input();
+		OePin::make_low();
+	}
+
+	static void clear()
+	{
+		ValuePin::make_input();
+		OePin::make_input();
+	}
+
+	static void make_input()
+	{
+		ValuePin::make_input();
+		OePin::set_value(0);
+	}
+
+	static void make_high()
+	{
+		OePin::set_value(1);
+		ValuePin::make_high();
+	}
+
+	static void make_low()
+	{
+		OePin::set_value(1);
+		ValuePin::make_low();
+	}
+
+	static void make_output()
+	{
+		OePin::set_value(1);
+		ValuePin::make_output();
+	}
+
+	static void set_value(uint8_t value)
+	{
+		ValuePin::set_value(value);
+	}
+
+	static void set_high()
+	{
+		ValuePin::set_high();
+	}
+
+	static void set_low()
+	{
+		ValuePin::set_low();
+	}
+
+	static bool read()
+	{
+		return ValuePin::read();
+	}
+
+	static void toggle()
+	{
+		ValuePin::toggle();
+	}
+
+	static void make_inverted()
+	{
+		ValuePin::make_inverted();
+	}
+
+	static void make_noninverted()
+	{
+		ValuePin::make_noninverted();
+	}
+};
+
 
 #endif // AVRLIB_XMEGA_PIN_HPP
