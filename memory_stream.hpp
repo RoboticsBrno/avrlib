@@ -41,7 +41,8 @@ public:
 
 	void write(uint8_t v)
 	{
-		m_tx_buffer[m_tx_size++] = v;
+		if (m_tx_size != TxCapacity)
+			m_tx_buffer[m_tx_size++] = v;
 	}
 
 private:
