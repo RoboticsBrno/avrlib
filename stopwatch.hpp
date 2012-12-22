@@ -96,6 +96,11 @@ public:
 			m_base = 0;
 	}
 
+	bool running() const
+	{
+		return m_running;
+	}
+
 	void cancel()
 	{
 		m_running = false;
@@ -128,12 +133,17 @@ public:
 
 	time_type operator()() const
 	{
+		return this->get();
+	}
+
+	time_type get() const
+	{
 		if (m_running)
 			return m_timer->value() - m_base;
 		else
 			return m_base;
 	}
-	
+
 	void set(time_type value)
 	{
 		if (m_running)
