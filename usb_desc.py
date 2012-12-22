@@ -106,7 +106,7 @@ def CustomDescriptor(desc_type, data):
         chunks.append(chunk)
     return ''.join(chunks)
 
-def print_descriptors(fout, descriptors):
+def print_descriptors(fout, descriptors, rev_hash=None):
     if 'comment' in descriptors:
         log = descriptors['comment']
         log = '// ' + '\n// '.join(log) + '\n\n'
@@ -132,6 +132,9 @@ static usb_descriptor_entry_t const usb_descriptor_map[] = {
         fout.write('    { 0x%03x, 0x%03x, 0x%03x }, // %d\n' % (key, oldlen, len(data) - oldlen, len(data) - oldlen))
     fout.write('};\n\nstatic uint8_t const usb_descriptors[] PROGMEM = {\n')
 
+    if rev_hash:
+        rev_hash_pos = data.find(rev_hash)
+
     while data:
         line = '    '
         for ch in data[:16]:
@@ -141,3 +144,6 @@ static usb_descriptor_entry_t const usb_descriptor_map[] = {
         data = data[16:]
 
     fout.write('};\n')
+
+    if rev_hash:
+        fout.write('\nstatic uint16_t const rev_hash_offset = 0x%x;\n' % rev_hash_pos)
