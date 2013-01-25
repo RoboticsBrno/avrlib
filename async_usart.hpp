@@ -47,6 +47,11 @@ public:
 	{
 		return !m_tx_buffer.full();
 	}
+	
+	bool transmitted()
+	{
+		return m_usart.transmitted();
+	}
 
 	value_type read()
 	{
@@ -112,6 +117,11 @@ public:
 
 	void intr_rx()
 	{
+		if(m_usart.frame_error())
+		{
+			m_usart.recv();
+			return;
+		}
 		value_type v = m_bootseq.check(m_usart.recv());
 		m_rx_buffer.push(v);
 	}
