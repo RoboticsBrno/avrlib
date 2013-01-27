@@ -51,6 +51,16 @@ public:
 	{
 		return (m_p->STATUS & USART_BUFOVF_bm) != 0;
 	}
+	
+	bool frame_error() const
+	{
+		return (m_p->STATUS & USART_FERR_bm) != 0;
+	}
+	
+	bool parity_error() const
+	{
+		return (m_p->STATUS & USART_PERR_bm) != 0;
+	}
 
 	value_type recv()
 	{
@@ -65,6 +75,14 @@ public:
 	bool tx_empty() const
 	{
 		return (m_p->STATUS & USART_DREIF_bm) != 0;
+	}
+	
+	bool transmitted()
+	{
+		if((m_p->STATUS & USART_TXCIF_bm) == 0)
+			return false;
+		m_p->STATUS = USART_TXCIF_bm;
+		return true;
 	}
 	
 private:
