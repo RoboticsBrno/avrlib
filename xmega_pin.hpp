@@ -21,6 +21,7 @@
 		static void pullup() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc; } \
 		static void pulldown() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLDOWN_gc; } \
 		static void totem() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_TOTEM_gc; } \
+		static void buskeeper() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_BUSKEEPER_gc; } \
 		static bool read() { return (port##_IN & (1<<(pin))) != 0; } \
 		static void pinctrl(uint8_t v) { port##_PIN##pin##CTRL = v; } \
 		static void make_inverted() { port##_PIN##pin##CTRL |= PORT_INVEN_bm; } \
@@ -56,24 +57,24 @@ struct pin_buffer_with_oe
 	static void make_input()
 	{
 		ValuePin::make_input();
-		OePin::set_value(0);
+		OePin::set_low();
 	}
 
 	static void make_high()
 	{
-		OePin::set_value(1);
+		OePin::set_high();
 		ValuePin::make_high();
 	}
 
 	static void make_low()
 	{
-		OePin::set_value(1);
+		OePin::set_high();
 		ValuePin::make_low();
 	}
 
 	static void make_output()
 	{
-		OePin::set_value(1);
+		OePin::set_high();
 		ValuePin::make_output();
 	}
 
