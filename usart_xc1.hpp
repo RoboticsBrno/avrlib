@@ -60,6 +60,11 @@ public:
 	{
 		return (USARTC1.STATUS & USART_DREIF_bm) != 0;
 	}
+
+	bool frame_error() const
+	{
+		return (USARTC1_STATUS & USART_FERR_bm) != 0;
+	}
 };
 
 }
