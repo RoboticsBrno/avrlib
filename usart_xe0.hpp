@@ -11,7 +11,7 @@ class usart_xe0
 public:
 	typedef uint8_t value_type;
 
-	void open(uint16_t baudrate, bool rx_interrupt = false, bool synchronous = false)
+	void open(uint16_t baudrate, bool rx_interrupt = false, bool synchronous = false, bool dbl = false)
 	{
 		this->set_speed(baudrate);
 		if (rx_interrupt)
@@ -20,7 +20,7 @@ public:
 			USARTE0.CTRLA = 0;
 		USARTE0.CTRLC = (synchronous? USART_CMODE_SYNCHRONOUS_gc: USART_CMODE_ASYNCHRONOUS_gc)
 			| (3<<USART_CHSIZE_gp);
-		USARTE0.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
+		USARTE0.CTRLB = USART_RXEN_bm | USART_TXEN_bm | (dbl? USART_CLK2X_bm: 0);
 	}
 
 	void close()
@@ -30,10 +30,11 @@ public:
 		USARTE0.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | (3<<USART_CHSIZE_gp);
 	}
 
-	void set_speed(uint16_t baudrate)
+	void set_speed(uint16_t baudrate, bool dbl = false)
 	{
 		USARTE0.BAUDCTRLA = (uint8_t)(baudrate);
 		USARTE0.BAUDCTRLB = (uint8_t)(baudrate >> 8);
+		USARTE0.CTRLB = (USARTE0.CTRLB & ~USART_CLK2X_bm) | (dbl? USART_CLK2X_bm: 0);
 	}
 
 	void send(value_type v)
