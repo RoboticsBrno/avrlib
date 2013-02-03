@@ -13,6 +13,12 @@ void send(Stream & s, char const * str)
 		s.write(*str);
 }
 
+template <typename Stream>
+void send_bool(Stream & s, bool value)
+{
+	send(s, value? "true": "false");
+}
+
 template <typename Stream, typename Unsigned>
 void send_hex(Stream & s, Unsigned v, uint8_t width = 0, char fill = '0')
 {
