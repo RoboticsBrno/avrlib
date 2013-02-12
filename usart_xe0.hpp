@@ -37,6 +37,11 @@ public:
 		USARTE0.CTRLB = (USARTE0.CTRLB & ~USART_CLK2X_bm) | (dbl? USART_CLK2X_bm: 0);
 	}
 
+	void set_mode(uint8_t mode)
+	{
+		USARTE0_CTRLC = USART_CMODE_ASYNCHRONOUS_gc | mode;
+	}
+
 	void send(value_type v)
 	{
 		USARTE0.DATA = v;
