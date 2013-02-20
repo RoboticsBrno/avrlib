@@ -83,6 +83,16 @@ public:
 	{
 		return (UCSRA & (1<<DOR)) != 0;
 	}
+	
+	bool frame_error() const
+	{
+		return (UCSRA & (1<<FE)) != 0;
+	}
+	
+	bool parity_error() const
+	{
+		return (UCSRA & (1<<UPE)) != 0;
+	}
 
 	value_type recv()
 	{
