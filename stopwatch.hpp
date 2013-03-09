@@ -209,6 +209,22 @@ public:
 	{
 		return (*this)() > m_timeout;
 	}
+	
+	void set_timeout(const time_type & value)
+	{
+		m_timeout = value;
+	}
+	
+	time_type get_timeout() const
+	{
+		return m_timeout;
+	}
+	
+	void reset(const time_type & new_timeout)
+	{
+		m_timeout = new_timeout;
+		this->ack();
+	}
 
 private:
 	time_type m_timeout;
