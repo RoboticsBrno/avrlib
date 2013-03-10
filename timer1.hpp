@@ -133,7 +133,7 @@ struct timer1
 		static void value(value_type v) { OCR1C = v; }
 		static value_type value() { return OCR1C; }
 			
-#ifdef __AVR_ATmega128__
+#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega8U2__)
 		static void interrupt(bool enable)
 		{
 			if (enable)
