@@ -8,7 +8,7 @@ namespace avrlib {
 class command_parser
 {
 public:
-	enum state_t { bad, ready, simple_command, header, data };
+	enum state_t { bad, ready, simple_command, header, st_data };
 
 	command_parser()
 		: m_state(bad), m_cmd(0), m_cmd_size(0), m_size(0)
@@ -22,6 +22,7 @@ public:
 
 	uint8_t command() const { return m_cmd; }
 	uint8_t size() const { return m_size; }
+	uint8_t const * data() const { return m_buffer; }
 
 	uint8_t push_data(uint8_t ch)
 	{
@@ -54,12 +55,12 @@ public:
 			m_cmd = ch >> 4;
 
 			m_size = 0;
-			m_state = m_cmd_size == 0? ready: data;
+			m_state = m_cmd_size == 0? ready: st_data;
 			break;
 
-		case data:
+		case st_data:
 			m_buffer[m_size++] = ch;
-			m_state = m_cmd_size == m_size? ready: data;
+			m_state = m_cmd_size == m_size? ready: st_data;
 			break;
 
 		default:
