@@ -42,6 +42,9 @@ struct pin_totem_drive
 template <typename ValuePin, typename OePin>
 struct pin_buffer_with_oe
 {
+	typedef ValuePin value_pin;
+	typedef OePin oe_pin;
+
 	static void init()
 	{
 		ValuePin::make_input();
