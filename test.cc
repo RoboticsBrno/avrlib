@@ -4,7 +4,7 @@
 #include "format.hpp"
 using namespace avrlib;
 
-sync_usart<usart1> rs232(38400);
+sync_usart<usart1> rs232(38400U);
 
 int main()
 {

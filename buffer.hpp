@@ -34,14 +34,14 @@ public:
 
 	bool full() const
 	{
-		return next(m_wptr) == m_rptr;
+		return this->next(m_wptr) == m_rptr;
 	}
 
 	void push(value_type v)
 	{
 		index_type wptr = m_wptr;
 		m_buffer[wptr] = v;
-		m_wptr = next(wptr);
+		m_wptr = this->next(wptr);
 	}
 
 	value_type top() const
@@ -56,16 +56,16 @@ public:
 
 	value_type operator[](index_type i) const
 	{
-		return m_buffer[next(m_rptr, i)];
+		return m_buffer[this->next(m_rptr, i)];
 	}
 
 	template <typename Writer>
 	void copy_to(Writer & writer, index_type len, index_type offset = 0) const
 	{
 		AVRLIB_ASSERT(len + offset <= this->size());
-		uint8_t rptr = next(m_rptr, offset);
+		uint8_t rptr = this->next(m_rptr, offset);
 
-		if (next(rptr, len) < rptr)
+		if (this->next(rptr, len) < rptr)
 		{
 			writer.write(m_buffer + rptr, capacity - rptr);
 			writer.write(m_buffer, len - (capacity - rptr));
@@ -85,7 +85,7 @@ public:
 		if (free < len)
 			len = free;
 
-		if (wptr > next(wptr, len))
+		if (wptr > this->next(wptr, len))
 		{
 			reader.read(m_buffer + wptr, capacity - wptr);
 			reader.read(m_buffer, len - (capacity - wptr));
@@ -95,18 +95,18 @@ public:
 			reader.read(m_buffer + wptr, len);
 		}
 
-		m_wptr = next(wptr, len);
+		m_wptr = this->next(wptr, len);
 		return len;
 	}
 
 	void pop()
 	{
-		m_rptr = next(m_rptr);
+		m_rptr = this->next(m_rptr);
 	}
 
 	void pop(index_type len)
 	{
-		m_rptr = next(m_rptr, len);
+		m_rptr = this->next(m_rptr, len);
 	}
 
 	bool try_pop(value_type & v)
@@ -115,7 +115,7 @@ public:
 		if (m_wptr == rptr)
 			return false;
 		v = m_buffer[rptr];
-		m_rptr = next(rptr);
+		m_rptr = this->next(rptr);
 		return true;
 	}
 
