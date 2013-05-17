@@ -51,7 +51,7 @@ public:
 
 	index_type size() const
 	{
-		return dist(m_wptr, m_rptr);
+		return this->dist(m_wptr, m_rptr);
 	}
 
 	value_type operator[](index_type i) const
