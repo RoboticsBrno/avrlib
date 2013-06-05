@@ -23,6 +23,8 @@ public:
 		USARTD1.CTRLC = (synchronous? USART_CMODE_SYNCHRONOUS_gc: USART_CMODE_ASYNCHRONOUS_gc)
 			| (3<<USART_CHSIZE_gp);
 		USARTD1.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
+		
+		PORTD.DIRSET = (1<<7);
 	}
 
 	void close()
