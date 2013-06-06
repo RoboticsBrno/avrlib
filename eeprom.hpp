@@ -21,10 +21,11 @@ inline void load_eeprom(uint8_t address, uint8_t * ptr, uint8_t len)
 }
 
 template <typename T>
-T load_eeprom(uint8_t address)
+T load_eeprom(uint8_t address, T& data)
 {
 	T res;
 	load_eeprom(address, (uint8_t *)&res, sizeof res);
+	data = res;
 	return res;
 }
 

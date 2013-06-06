@@ -9,6 +9,9 @@
 	{ \
 		static uint8_t const bp = pin; \
 		static uint8_t const bm = (1<<pin); \
+		static uint8_t const int_vect_0 = port##_INT0_vect_num; \
+		static uint8_t const int_vect_1 = port##_INT1_vect_num; \
+		static PORT_t& PORT() { return port; } \
 		static void make_input() { port##_DIRCLR = (1<<(pin)); } \
 		static void make_high() { port##_OUTSET = (1<<(pin)); port##_DIRSET = (1<<(pin)); } \
 		static void make_low() { port##_OUTCLR = (1<<(pin)); port##_DIRSET = (1<<(pin)); } \
