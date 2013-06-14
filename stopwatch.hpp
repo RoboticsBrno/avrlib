@@ -227,7 +227,7 @@ public:
 	}
 
 private:
-	time_type m_timeout;
+	volatile time_type m_timeout;
 };
 
 }
