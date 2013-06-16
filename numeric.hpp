@@ -31,6 +31,13 @@ struct least_uint
 		typename detail::mpl_if<(Value < 0x10000), uint16_t, uint32_t>::type >::type type;
 };
 
+// Gives the fastest unsigned type that can represent Value.
+template <uint_max_t Value>
+struct fastest_uint
+{
+	typedef typename least_uint<Value>::type type;
+};
+
 }
 
 #endif
