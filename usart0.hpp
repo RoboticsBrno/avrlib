@@ -7,6 +7,13 @@
 #include "usart_base.hpp"
 #include "intr_prio.hpp"
 
+#ifndef FE0
+#define FE0 FE
+#endif
+#ifndef UPE0
+#define UPE0 UPE
+#endif
+
 namespace avrlib {
 
 class usart0
@@ -86,12 +93,12 @@ public:
 	
 	bool frame_error() const
 	{
-		return (UCSR0A & (1<<FE)) != 0;
+		return (UCSR0A & (1<<FE0)) != 0;
 	}
 	
 	bool parity_error() const
 	{
-		return (UCSR0A & (1<<UPE)) != 0;
+		return (UCSR0A & (1<<UPE0)) != 0;
 	}
 
 	value_type recv()

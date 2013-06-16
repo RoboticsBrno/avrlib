@@ -9,6 +9,9 @@
 	{ \
 		static uint8_t const bp = pin; \
 		static uint8_t const bm = (1<<pin); \
+		static uint8_t const int_vect_0 = port##_INT0_vect_num; \
+		static uint8_t const int_vect_1 = port##_INT1_vect_num; \
+		static PORT_t& PORT() { return port; } \
 		static void make_input() { port##_DIRCLR = (1<<(pin)); } \
 		static void make_high() { port##_OUTSET = (1<<(pin)); port##_DIRSET = (1<<(pin)); } \
 		static void make_low() { port##_OUTCLR = (1<<(pin)); port##_DIRSET = (1<<(pin)); } \
@@ -20,6 +23,10 @@
 		static void toggle() { port##_OUTTGL = (1<<(pin)); } \
 		static void pullup() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc; } \
 		static void pulldown() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLDOWN_gc; } \
+		static void wiredor() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_WIREDOR_gc; } \
+		static void wiredand() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_WIREDAND_gc; } \
+		static void wiredor_pull() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_WIREDORPULL_gc; } \
+		static void wiredand_pull() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_WIREDANDPULL_gc; } \
 		static void totem() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_TOTEM_gc; } \
 		static void buskeeper() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_BUSKEEPER_gc; } \
 		static bool read() { return (port##_IN & (1<<(pin))) != 0; } \

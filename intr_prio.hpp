@@ -9,7 +9,7 @@ enum intr_prio_t
 	intr_enabled = 1,
 	intr_lo = 1,
 	intr_med = 2,
-	intr_hi = 3,
+	intr_hi = 3
 };
 
 }

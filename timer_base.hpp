@@ -12,7 +12,7 @@ enum timer_clock_source
 	timer_fosc_256 = 4,
 	timer_fosc_1024 = 5,
 	timer_ext_falling = 6,
-	timer_ext_rising = 7,
+	timer_ext_rising = 7
 };
 
 static const uint16_t timer_clock_prescaler_values [] = 
@@ -37,7 +37,7 @@ enum timer_mode
 	timer_mode_ctc_icr,
 	timer_mode_13,
 	timer_mode_pwm_icr,
-	timer_mode_pwm_ocra,
+	timer_mode_pwm_ocra
 };
 
 enum timer_ocr_mode
@@ -45,7 +45,7 @@ enum timer_ocr_mode
 	timer_ocr_mode_disconnected = 0,
 	timer_ocr_mode_toggle = 1,
 	timer_ocr_mode_positive = 2,
-	timer_ocr_mode_negative = 3,
+	timer_ocr_mode_negative = 3
 };
 
 typedef uint16_t timer_16b_value_type;

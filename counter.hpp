@@ -6,13 +6,14 @@
 
 namespace avrlib {
 
-template <typename Timer, typename Time = uint32_t, bool full_bit_period = true>
+template <typename Timer, typename Time = uint32_t, typename Overflow = uint16_t, bool full_bit_period = true>
 struct counter
 {
 	typedef Timer timer_type;
 	typedef Time time_type;
+	typedef Overflow overflow_type;
 
-	template <uint32_t v>
+	template <time_type v>
 	struct us : timer_type::template us<v>
 	{
 	};
@@ -51,7 +52,7 @@ struct counter
 	time_type value() const
 	{
 		typename timer_type::time_type time = timer_type::value();
-		uint16_t overflows;
+		overflow_type overflows;
 
 		for (;;)
 		{
@@ -60,28 +61,30 @@ struct counter
 			// interrupt priorities.
 			while (timer_type::overflow()) {}
 
-			overflows = static_cast<uint16_t volatile const &>(m_overflows);
+			overflows = static_cast<overflow_type volatile const &>(m_overflows);
 			typename timer_type::time_type new_time = timer_type::value();
 
 			if (new_time >= time)
 			{
 				if(full_bit_period)
-					return ((time_type)overflows << timer_type::value_bits) | new_time;
+					return (time_type(overflows) << timer_type::value_bits) | new_time;
 				else
-					return ((time_type)overflows * timer_type::top()) + new_time;
+					return (time_type(overflows) * timer_type::top()) + new_time;
 			}				
 
 			time = new_time;
 		}
 	}
+	
+	inline time_type operator()() const { return value(); }
 
 	void tov_interrupt() const
 	{
-		++static_cast<uint16_t volatile &>(m_overflows);
+		++static_cast<overflow_type volatile &>(m_overflows);
 	}
 
 private:
-	mutable uint16_t m_overflows;
+	mutable overflow_type m_overflows;
 };
 
 }

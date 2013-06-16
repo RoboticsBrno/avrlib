@@ -21,6 +21,8 @@ public:
 		USARTC1.CTRLC = (synchronous? USART_CMODE_SYNCHRONOUS_gc: USART_CMODE_ASYNCHRONOUS_gc)
 			| (3<<USART_CHSIZE_gp);
 		USARTC1.CTRLB = USART_RXEN_bm | USART_TXEN_bm | (dbl? USART_CLK2X_bm: 0);
+		
+		PORTC.DIRSET = (1<<7);
 	}
 
 	void close()
