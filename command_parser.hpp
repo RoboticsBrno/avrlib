@@ -105,8 +105,8 @@ public:
 	uint8_t push_data(uint8_t ch)
 	{
 		time_type const & time = m_timer();
-		if (time - m_last_push > m_timeout)
-			this->clear();
+		//if (time - m_last_push > m_timeout)
+			//this->clear();
 
 		m_last_push = time;
 		return this->command_parser::push_data(ch);	

@@ -61,6 +61,9 @@ public:
 	void process_tx()
 	{
 	}
+	
+	usart_type & usart() { return m_usart; }
+	usart_type const & usart() const { return m_usart; }
 
 private:
 	usart_type m_usart;
