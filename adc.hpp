@@ -4,6 +4,17 @@
 #include <avr/io.h>
 
 namespace avrlib {
+	
+enum adc_timer_mode	
+{
+	adc_prescaler_2 = 1,
+	adc_prescaler_4,
+	adc_prescaler_8,	
+	adc_prescaler_16,
+	adc_prescaler_32,
+	adc_prescaler_64,
+	adc_prescaler_128	
+};
 
 class sync_adc
 {
@@ -11,6 +22,11 @@ public:
 	explicit sync_adc(uint8_t channel, bool reverse = false)
 		: m_channel(channel), m_reverse(reverse)
 	{
+	}
+	
+	static void init(adc_timer_mode t)
+	{
+		ADCSRA = (1<<ADEN) | t;		
 	}
 
 	void start()
@@ -61,9 +77,14 @@ class async_adc
 {
 public:
 	explicit async_adc(uint8_t channel, bool reverse = false)
-		: m_channel(channel), m_reverse(reverse), m_value(0)
+		: m_channel(channel), m_reverse(reverse), m_value(0), m_new_value(false)
 	{
 	}
+
+	static void init(adc_timer_mode t)
+	{
+		ADCSRA = (1<<ADEN) | t;
+	}	
 
 	void start()
 	{
@@ -81,19 +102,25 @@ public:
 
 		if (m_reverse)
 			m_value = -m_value;
-
+		
+		m_new_value = true;
+		
 		return true;
 	}
 
-	uint16_t value() const
+	uint16_t value()
 	{
+		m_new_value = false;
 		return m_value;
 	}
+	
+	bool new_value() const { return m_new_value; }
 
 private:
 	uint8_t m_channel;
 	bool m_reverse;
-	uint16_t m_value;
+	volatile uint16_t m_value;
+	volatile bool m_new_value;
 };
 
 }

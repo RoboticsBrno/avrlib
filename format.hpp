@@ -230,11 +230,17 @@ public:
 	template <typename T>
 	format_impl & operator%(T const & t)
 	{
-		bool hex = m_pattern.top() == 'x';
+		char f = m_pattern.top();
+		bool hex =  false;
+		uint8_t width = 0;
+		if(f == 'x')
+			hex = true;
+		else if(f >='0' && f <= '9')
+			width = f - '0';
 		if (hex)
-			send_hex(m_out, t);
+			send_hex(m_out, t, width);
 		else
-			send_int(m_out, t);
+			send_int(m_out, t, width);
 		m_pattern.pop();
 		this->write_literal();
 		return *this;
