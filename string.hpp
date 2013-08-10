@@ -37,6 +37,12 @@ public:
 		assign(str);
 	}
 	
+	basic_string(const volatile basic_string<T, _alloc_space>& str)
+		: _length(0)
+	{
+		assign(str);
+	}
+	
 	basic_string(const basic_string<T, _alloc_space>& str, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n)
 		: _length(0)
 	{
@@ -90,6 +96,11 @@ public:
 		return _length;
 	}
 	
+	inline AVRLIB_STRING_SIZE_TYPE size() const volatile
+	{
+		return _length;
+	}
+	
 	inline AVRLIB_STRING_SIZE_TYPE length() const
 	{
 		return _length;
@@ -115,6 +126,11 @@ public:
 	inline const T& operator[](AVRLIB_STRING_SIZE_TYPE index) const
 	{
 		return m_data[index];
+	}
+	
+	inline const T& operator[](AVRLIB_STRING_SIZE_TYPE index) const volatile
+	{
+		return *const_cast<char*>(m_data+index);
 	}
 
 	inline T& operator[](AVRLIB_STRING_SIZE_TYPE index)
@@ -212,6 +228,14 @@ public:
 		return *this;
 	}
 	
+	basic_string<T, _alloc_space>& assign(const volatile basic_string<T, _alloc_space>& str) volatile
+	{
+		AVRLIB_STRING_SIZE_TYPE chars_count = _alloc_space < str.size()? _alloc_space : str.size();
+		for (_length = 0; _length != chars_count; ++_length)
+			m_data[_length] = str[_length];
+		return *const_cast<basic_string<T, _alloc_space>*>(this);
+	}
+	
 	basic_string<T, _alloc_space>& assign(const basic_string<T, _alloc_space>& str, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n)
 	{
 		return assign(str.substr(pos, n));
@@ -247,6 +271,12 @@ public:
 		return *this;
 	}
 	
+	inline basic_string<T, _alloc_space>& operator = (const volatile basic_string<T, _alloc_space>& str) volatile
+	{
+		assign(str);
+		return *const_cast<basic_string<T, _alloc_space>*>(this);
+	}
+	
 	inline basic_string<T, _alloc_space>& operator = (const T* s)
 	{
 		assign(s);
@@ -266,7 +296,7 @@ public:
 	{
 		if (pos >= _length)
 			return *this;
-		if ((pos + n) >= _length)
+		if ((pos + n) >= _length || n == npos)
 		{
 			_length = pos;
 			return *this;

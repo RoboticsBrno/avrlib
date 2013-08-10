@@ -15,6 +15,14 @@ struct pin
 	}
 
 	static void clear() { set(false); }
+		
+	static void toggle()
+	{
+		if (!get())
+			Port::port(Port::port() | (1<<Pin));
+		else
+			Port::port(Port::port() & ~(1<<Pin));
+	}
 
 	static bool get() { return (Port::port() & (1<<Pin)) != 0; }
 
@@ -30,6 +38,7 @@ struct pin
 
 	static bool output() { return (Port::dir() & (1<<Pin)) != 0; }
 
+	static void make_output() { output(true); }
 	static void make_input() { output(false); clear(); }
 	static void make_low() { clear(); output(true); }
 	static void make_high() { set(); output(true); }

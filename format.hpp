@@ -13,10 +13,48 @@ void send(Stream & s, char const * str)
 		s.write(*str);
 }
 
+#ifdef AVRLIB_STRING_HPP
+template <typename Stream>
+void send(Stream & s, const string& str)
+{
+	for (AVRLIB_STRING_SIZE_TYPE i = 0; i != str.size(); ++i)
+	s.write(str[i]);
+}
+#endif
+
 template <typename Stream>
 void send_bool(Stream & s, bool value)
 {
 	send(s, value? "true": "false");
+}
+
+template <typename Stream, typename Unsigned>
+void send_bin_text(Stream & s, Unsigned v, uint8_t width = 0, char fill = '0')
+{
+	char buf[32];
+	uint8_t i = 0;
+
+	if (v == 0)
+	{
+		buf[i++] = '0';
+	}
+	else if (v < 0)
+	{
+		buf[i++] = '*';
+	}
+	else
+	{
+		for (; v != 0; v >>= 1)
+		{
+			buf[i++] = '0' + (v & 0x1);
+		}
+	}
+
+	while (i < width)
+		buf[i++] = fill;
+	
+	for (; i > 0; --i)
+		s.write(buf[i - 1]);
 }
 
 template <typename Stream, typename Unsigned>

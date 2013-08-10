@@ -7,6 +7,10 @@
 #include "usart_base.hpp"
 #include "intr_prio.hpp"
 
+#ifndef UPE
+#define UPE PE
+#endif
+
 namespace avrlib {
 
 class usart
