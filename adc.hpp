@@ -4,6 +4,17 @@
 #include <avr/io.h>
 
 namespace avrlib {
+	
+enum adc_timer_mode	
+{
+	adc_prescaler_2 = 1,
+	adc_prescaler_4,
+	adc_prescaler_8,	
+	adc_prescaler_16,
+	adc_prescaler_32,
+	adc_prescaler_64,
+	adc_prescaler_128	
+};
 
 class sync_adc
 {
@@ -11,6 +22,11 @@ public:
 	explicit sync_adc(uint8_t channel, bool reverse = false)
 		: m_channel(channel), m_reverse(reverse)
 	{
+	}
+	
+	static void init(adc_timer_mode t)
+	{
+		ADCSRA = (1<<ADEN) | t;		
 	}
 
 	void start()
@@ -64,6 +80,11 @@ public:
 		: m_channel(channel), m_reverse(reverse), m_value(0), m_new_value(false)
 	{
 	}
+
+	static void init(adc_timer_mode t)
+	{
+		ADCSRA = (1<<ADEN) | t;
+	}	
 
 	void start()
 	{
