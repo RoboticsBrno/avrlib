@@ -76,6 +76,9 @@ private:
 class async_adc
 {
 public:
+
+	typedef uint16_t value_type;
+
 	explicit async_adc(uint8_t channel, bool reverse = false)
 		: m_channel(channel), m_reverse(reverse), m_value(0), m_new_value(false)
 	{
@@ -108,18 +111,20 @@ public:
 		return true;
 	}
 
-	uint16_t value()
+	value_type value()
 	{
 		m_new_value = false;
 		return m_value;
 	}
 	
 	bool new_value() const { return m_new_value; }
+		
+	uint8_t channel() const { return m_channel; }
 
 private:
 	uint8_t m_channel;
 	bool m_reverse;
-	volatile uint16_t m_value;
+	volatile value_type m_value;
 	volatile bool m_new_value;
 };
 
