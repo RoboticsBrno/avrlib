@@ -102,6 +102,46 @@ private:
 	volatile bool m_new_value;
 };
 
+class fast_async_adc
+{
+public:
+	explicit fast_async_adc(uint8_t channel)
+		: m_channel(channel | (1<<ADLAR)), m_value(0), m_new_value(0)
+	{
+	}
+
+	void start()
+	{
+		ADMUX =  m_channel;
+		ADCSRA = adcsra;
+	}
+
+	inline void process()
+	{
+		m_value = ADCL;
+		m_value |= ADCH << 8;
+		
+		m_new_value = 1;
+	}
+
+	uint16_t value()
+	{
+		m_new_value = 0;
+		return m_value;
+	}
+	
+	inline uint8_t new_value() const { return m_new_value; }
+		
+	static uint8_t adcsra;
+
+private:
+	uint8_t m_channel;
+	volatile uint16_t m_value;
+	volatile uint8_t m_new_value;
+};
+
+uint8_t fast_async_adc::adcsra = (1<<ADEN) | (1<<ADSC) | 7;
+
 }
 
 #endif
