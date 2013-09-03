@@ -33,6 +33,8 @@
 		static void pinctrl(uint8_t v) { port##_PIN##pin##CTRL = v; } \
 		static void make_inverted() { port##_PIN##pin##CTRL |= PORT_INVEN_bm; } \
 		static void make_noninverted() { port##_PIN##pin##CTRL &= ~PORT_INVEN_bm; } \
+		static void slew_rate_limit_enable() { port##_PIN##pin##CTRL |= PORT_SRLEN_bm; } \
+		static void slew_rate_limit_disable() { port##_PIN##pin##CTRL &= ~PORT_SRLEN_bm; } \
 	}
 
 template <typename PinHigh, typename PinLow>
