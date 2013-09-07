@@ -1,1 +1,2 @@
-/docu/
+syntax: glob
+./docu/
