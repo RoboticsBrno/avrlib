@@ -16,7 +16,13 @@ struct pin
 
 	static void clear() { set(false); }
 		
-	static void toggle() { Port::port(Port::port() ^ (1<<Pin)); }
+	static void toggle()
+	{
+		if (!get())
+			Port::port(Port::port() | (1<<Pin));
+		else
+			Port::port(Port::port() & ~(1<<Pin));
+	}
 
 	static bool get() { return (Port::port() & (1<<Pin)) != 0; }
 
