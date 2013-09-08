@@ -222,10 +222,8 @@ public:
 	
 	void reset(const time_type & new_timeout)
 	{
-		this->cancel();
+		this->clear();
 		m_timeout = new_timeout;
-		this->start();
-		//this->ack();
 	}
 
 private:
