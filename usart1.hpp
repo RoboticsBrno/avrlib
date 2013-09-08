@@ -118,9 +118,9 @@ public:
 
 	bool transmitted()
 	{
-		if((UCSR0A & (1<<TXC0)) == 0)
+		if((UCSR1A & (1<<TXC1)) == 0)
 			return false;
-		UCSR0A |= (1<<TXC0);
+		UCSR1A |= (1<<TXC1);
 		return true;
 	}
 };
