@@ -131,10 +131,15 @@ private:
 class fast_async_adc
 {
 public:
+	
+	typedef uint16_t value_type;
+
 	explicit fast_async_adc(uint8_t channel)
 		: m_channel(channel | (1<<ADLAR)), m_value(0), m_new_value(0)
 	{
 	}
+	
+	static void init(adc_timer_mode t) {};
 
 	void start()
 	{
@@ -150,7 +155,13 @@ public:
 		m_new_value = 1;
 	}
 
-	uint16_t value()
+	value_type value()
+	{
+		m_new_value = 0;
+		return m_value;
+	}
+	
+	value_type operator()()
 	{
 		m_new_value = 0;
 		return m_value;
@@ -162,7 +173,7 @@ public:
 
 private:
 	uint8_t m_channel;
-	volatile uint16_t m_value;
+	volatile value_type m_value;
 	volatile uint8_t m_new_value;
 };
 
