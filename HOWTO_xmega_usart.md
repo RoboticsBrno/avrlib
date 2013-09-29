@@ -1,5 +1,3 @@
-<!--- Jarek Malec @ 8. 9. 2013 -->
-
 Jak rozchodit sériovou linku na čipech Xmega
 ============================================
 
@@ -100,3 +98,5 @@ Nyní už můžeme používat všelijaké funkce typu _send()_, _send_bin()_, _f
 [calc]: http://www.avrcalc.elektronik-projekt.de/xmega/baud_rate_calculator "Xmega Baud Rate Calculator"
 [atmelstudio]: http://www.atmel.com/System/GetBinary.ashx?target=tcm:26-49769&type=soft&actualTarget=tcm:26-49767 "Atmel Studio"
 [avrlibrepo]: https://technika.junior.cz/hg/avrlib "avrlib repozitář"
+
+<!--- Jarek Malec @ 8. 9. 2013 -->
