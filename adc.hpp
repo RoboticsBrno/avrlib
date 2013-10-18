@@ -76,6 +76,9 @@ private:
 class async_adc
 {
 public:
+
+	typedef uint16_t value_type;
+
 	explicit async_adc(uint8_t channel, bool reverse = false)
 		: m_channel(channel), m_reverse(reverse), m_value(0), m_new_value(false)
 	{
@@ -108,20 +111,73 @@ public:
 		return true;
 	}
 
-	uint16_t value()
+	value_type value()
 	{
 		m_new_value = false;
 		return m_value;
 	}
 	
 	bool new_value() const { return m_new_value; }
+		
+	uint8_t channel() const { return m_channel; }
 
 private:
 	uint8_t m_channel;
 	bool m_reverse;
-	volatile uint16_t m_value;
+	volatile value_type m_value;
 	volatile bool m_new_value;
 };
+
+class fast_async_adc
+{
+public:
+	
+	typedef uint16_t value_type;
+
+	explicit fast_async_adc(uint8_t channel)
+		: m_channel(channel | (1<<ADLAR)), m_value(0), m_new_value(0)
+	{
+	}
+	
+	static void init(adc_timer_mode t) {};
+
+	void start()
+	{
+		ADMUX =  m_channel;
+		ADCSRA = adcsra;
+	}
+
+	inline void process()
+	{
+		m_value = ADCL;
+		m_value |= ADCH << 8;
+		
+		m_new_value = 1;
+	}
+
+	value_type value()
+	{
+		m_new_value = 0;
+		return m_value;
+	}
+	
+	value_type operator()()
+	{
+		m_new_value = 0;
+		return m_value;
+	}
+	
+	inline uint8_t new_value() const { return m_new_value; }
+		
+	static uint8_t adcsra;
+
+private:
+	uint8_t m_channel;
+	volatile value_type m_value;
+	volatile uint8_t m_new_value;
+};
+
+uint8_t fast_async_adc::adcsra = (1<<ADEN) | (1<<ADSC) | 7;
 
 }
 

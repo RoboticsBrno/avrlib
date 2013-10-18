@@ -115,6 +115,14 @@ public:
 	{
 		return (UCSR1A & (1<<UDRE1)) != 0;
 	}
+
+	bool transmitted()
+	{
+		if((UCSR1A & (1<<TXC1)) == 0)
+			return false;
+		UCSR1A |= (1<<TXC1);
+		return true;
+	}
 };
 
 }
