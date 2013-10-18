@@ -3,6 +3,30 @@
 
 namespace avrlib {
 
+#if __AVR_ARCH__ >= 100 /*xmega*/
+
+enum timer_clock_source
+{
+	timer_no_clock = 0,
+	timer_fosc_1 = 1,
+	timer_fosc_2 = 2,
+	timer_fosc_4 = 3,
+	timer_fosc_8 = 4,
+	timer_fosc_64 = 5,
+	timer_fosc_256 = 6,
+	timer_fosc_1024 = 7,
+	timer_event_0 = 8,
+	timer_event_1 = 9,
+	timer_event_2 = 10,
+	timer_event_3 = 11,
+	timer_event_4 = 12,
+	timer_event_5 = 13,
+	timer_event_6 = 14,
+	timer_event_7 = 15
+};
+
+#else /*mega*/
+
 enum timer_clock_source
 {
 	timer_no_clock = 0,
@@ -54,6 +78,8 @@ static const timer_16b_value_type timer_top_8b  = 0x00FF;
 static const timer_16b_value_type timer_top_9b  = 0x01FF;
 static const timer_16b_value_type timer_top_10b = 0x03FF;
 static const timer_16b_value_type timer_top_16b = 0xFFFF;
+
+#endif /* mega / xmega */
 
 }
 
