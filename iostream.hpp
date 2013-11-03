@@ -78,13 +78,26 @@ bool number2string (Integer n, string &s, uint8_t align = 0,
 template <typename Integer>
 bool string2number(const string &s, Integer &res)
 {
-	bool isNegative = s[0]=='-';
+	uint8_t i = 0;
+	for(; s[i] == ' '; ++i)
+		if(i == s.length())
+			return false;
+	bool isNegative = s[i]=='-';
 	Integer n = 0;
-	for(uint8_t i = isNegative?1:0; i != s.length(); ++i)
+	bool success = false;
+	for(i += isNegative?1:0; i != s.length(); ++i)
 	{
 		if(s[i]<'0' || s[i]>'9')
-			return false;
+		{
+			if(!success)
+				return false;
+			if(isNegative)
+				n = -n;
+			res = n;
+			return true;
+		}
 		n = n*10+s[i]-'0';
+		success = true;
 	}
 	if(isNegative)
 		n = -n;
