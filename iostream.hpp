@@ -82,22 +82,49 @@ bool string2number(const string &s, Integer &res)
 	for(; s[i] == ' '; ++i)
 		if(i == s.length())
 			return false;
-	bool isNegative = s[i]=='-';
-	Integer n = 0;
-	bool success = false;
-	for(i += isNegative?1:0; i != s.length(); ++i)
+	bool isNegative = false;
+	if(s[i]=='-')
 	{
-		if(s[i]<'0' || s[i]>'9')
+		isNegative = true;
+		++i;
+	}
+	uint8_t base = 10;
+	if(s.length() > (i+2) && s[i] == '0')
+	{
+		switch(s[++i])
 		{
-			if(!success)
-				return false;
-			if(isNegative)
-				n = -n;
-			res = n;
-			return true;
+			case 'X':
+			case 'x': base = 16; ++i; break;
+			case 'B':
+			case 'b': base =  2; ++i; break;
+			default:
+				if(s[i]<'0' || s[i]>'9')
+					return false;
+				break;
 		}
-		n = n*10+s[i]-'0';
-		success = true;
+	}
+	Integer n = 0;
+	for(; i != s.length(); ++i)
+	{
+		uint8_t tmp = s[i];
+		switch(base)
+		{
+			case  2: tmp = (tmp=='0' || tmp=='1') ? (tmp - '0') : 255; break;
+			case 10: tmp = (tmp>='0' && tmp<='9') ? (tmp - '0') : 255; break;
+			case 16:
+				if(tmp>='0' && tmp<='9')
+					tmp -= '0';
+				else if(tmp>='a' && tmp<='f')
+					tmp -= 'a' - 10;
+				else if(tmp>='A' && tmp<='F')
+					tmp -= 'A' - 10;
+				else
+					tmp = 255;
+				break;
+		}
+		if(tmp == 255)
+			return false;
+		n = n * base + tmp;
 	}
 	if(isNegative)
 		n = -n;
