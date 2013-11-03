@@ -191,13 +191,15 @@ public:
 	}
 	
 	
-	inline void push_back(T c)
+	void push_back(T c)
 	{
 		if (_length == _alloc_space)
 			return;
 		m_data[_length] = c;
 		++_length;
 	}
+	
+	inline void write(T c) { push_back(c); } // non-standard method, added because avrlib::format
 	
 	
 	inline basic_string<T, _alloc_space>& operator += (const basic_string<T, _alloc_space>& str)
