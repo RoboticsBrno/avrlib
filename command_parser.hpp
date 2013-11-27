@@ -79,6 +79,8 @@ public:
 	state_t state() const { return m_state; }
 
 	uint8_t operator[](uint8_t index) const { return m_buffer[index]; }
+		
+	uint8_t* get_buffer() { return m_buffer; }
 
 private:
 	state_t m_state;
