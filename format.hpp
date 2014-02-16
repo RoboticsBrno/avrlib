@@ -234,14 +234,19 @@ public:
 		bool hex =  false;
 		uint8_t width = 0;
 		if(f == 'x')
+		{
 			hex = true;
-		else if(f >='0' && f <= '9')
+			m_pattern.pop();
+			f = m_pattern.top();
+		}
+		if(f >='0' && f <= '9')
 			width = f - '0';
 		if (hex)
 			send_hex(m_out, t, width);
 		else
 			send_int(m_out, t, width);
-		m_pattern.pop();
+		if(!m_pattern.empty())
+			m_pattern.pop();
 		this->write_literal();
 		return *this;
 	}
