@@ -19,8 +19,8 @@ enum adc_timer_mode
 class sync_adc
 {
 public:
-	explicit sync_adc(uint8_t channel, bool reverse = false)
-		: m_channel(channel), m_reverse(reverse)
+	explicit sync_adc(uint8_t channel, bool reverse = false, bool left_adj = true)
+		: m_channel(channel), m_reverse(reverse), m_left_adj(left_adj)
 	{
 	}
 	
@@ -48,7 +48,7 @@ public:
 
 	uint16_t operator()()
 	{
-		ADMUX = (1<<ADLAR) | m_channel;
+		ADMUX = (m_left_adj<<ADLAR) | m_channel;
 		ADCSRA |= (1<<ADSC);
 		while ((ADCSRA & (1<<ADIF)) == 0)
 		{
@@ -70,6 +70,7 @@ public:
 private:
 	uint8_t m_channel;
 	bool m_reverse;
+	bool m_left_adj;
 };
 
 
@@ -79,8 +80,8 @@ public:
 
 	typedef uint16_t value_type;
 
-	explicit async_adc(uint8_t channel, bool reverse = false)
-		: m_channel(channel), m_reverse(reverse), m_value(0), m_new_value(false)
+	explicit async_adc(uint8_t channel, bool reverse = false, bool left_adj = true)
+		: m_channel(channel), m_reverse(reverse), m_value(0), m_new_value(false), m_left_adj(left_adj)
 	{
 	}
 
@@ -91,7 +92,7 @@ public:
 
 	void start()
 	{
-		ADMUX = (1<<ADLAR) | m_channel;
+		ADMUX = (m_left_adj<<ADLAR) | m_channel;
 		ADCSRA |= (1<<ADSC);
 	}
 
@@ -126,7 +127,59 @@ private:
 	bool m_reverse;
 	volatile value_type m_value;
 	volatile bool m_new_value;
+	bool m_left_adj;
 };
+
+class fast_async_adc
+{
+public:
+	
+	typedef uint16_t value_type;
+
+	explicit fast_async_adc(uint8_t channel)
+		: m_channel(channel | (1<<ADLAR)), m_value(0), m_new_value(0)
+	{
+	}
+	
+	static void init(adc_timer_mode t) {};
+
+	void start()
+	{
+		ADMUX =  m_channel;
+		ADCSRA = adcsra;
+	}
+
+	inline void process()
+	{
+		m_value = ADCL;
+		m_value |= ADCH << 8;
+		
+		m_new_value = 1;
+	}
+
+	value_type value()
+	{
+		m_new_value = 0;
+		return m_value;
+	}
+	
+	value_type operator()()
+	{
+		m_new_value = 0;
+		return m_value;
+	}
+	
+	inline uint8_t new_value() const { return m_new_value; }
+		
+	static uint8_t adcsra;
+
+private:
+	uint8_t m_channel;
+	volatile value_type m_value;
+	volatile uint8_t m_new_value;
+};
+
+uint8_t fast_async_adc::adcsra = (1<<ADEN) | (1<<ADSC) | 7;
 
 }
 

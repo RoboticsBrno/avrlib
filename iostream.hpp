@@ -78,13 +78,53 @@ bool number2string (Integer n, string &s, uint8_t align = 0,
 template <typename Integer>
 bool string2number(const string &s, Integer &res)
 {
-	bool isNegative = s[0]=='-';
-	Integer n = 0;
-	for(uint8_t i = isNegative?1:0; i != s.length(); ++i)
-	{
-		if(s[i]<'0' || s[i]>'9')
+	uint8_t i = 0;
+	for(; s[i] == ' '; ++i)
+		if(i == s.length())
 			return false;
-		n = n*10+s[i]-'0';
+	bool isNegative = false;
+	if(s[i]=='-')
+	{
+		isNegative = true;
+		++i;
+	}
+	uint8_t base = 10;
+	if(s.length() > (i+2) && s[i] == '0')
+	{
+		switch(s[++i])
+		{
+			case 'X':
+			case 'x': base = 16; ++i; break;
+			case 'B':
+			case 'b': base =  2; ++i; break;
+			default:
+				if(s[i]<'0' || s[i]>'9')
+					return false;
+				break;
+		}
+	}
+	Integer n = 0;
+	for(; i != s.length(); ++i)
+	{
+		uint8_t tmp = s[i];
+		switch(base)
+		{
+			case  2: tmp = (tmp=='0' || tmp=='1') ? (tmp - '0') : 255; break;
+			case 10: tmp = (tmp>='0' && tmp<='9') ? (tmp - '0') : 255; break;
+			case 16:
+				if(tmp>='0' && tmp<='9')
+					tmp -= '0';
+				else if(tmp>='a' && tmp<='f')
+					tmp -= 'a' - 10;
+				else if(tmp>='A' && tmp<='F')
+					tmp -= 'A' - 10;
+				else
+					tmp = 255;
+				break;
+		}
+		if(tmp == 255)
+			return false;
+		n = n * base + tmp;
 	}
 	if(isNegative)
 		n = -n;

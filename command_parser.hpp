@@ -79,6 +79,8 @@ public:
 	state_t state() const { return m_state; }
 
 	uint8_t operator[](uint8_t index) const { return m_buffer[index]; }
+		
+	uint8_t* get_buffer() { return m_buffer; }
 
 private:
 	state_t m_state;
@@ -105,8 +107,8 @@ public:
 	uint8_t push_data(uint8_t ch)
 	{
 		time_type const & time = m_timer();
-		//if (time - m_last_push > m_timeout)
-			//this->clear();
+		if (time - m_last_push > m_timeout)
+			this->clear();
 
 		m_last_push = time;
 		return this->command_parser::push_data(ch);	

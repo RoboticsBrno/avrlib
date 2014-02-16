@@ -104,6 +104,8 @@ struct timer3
 			else
 				TIMSK3 &= (1<<OCIE3A);
 		}
+		static bool matched() { return TIFR3 & (1<<OCF3A); }
+		static void clear_matched() { TIFR3 = (1<<OCF3A); }
 	};
 
 	struct ocrb
@@ -123,6 +125,8 @@ struct timer3
 			else
 				TIMSK3 &= (1<<OCIE3B);
 		}
+		static bool matched() { return TIFR3 & (1<<OCF3B); }
+		static void clear_matched() { TIFR3 = (1<<OCF3B); }
 	};
 
 #ifdef OCR3C
@@ -143,6 +147,8 @@ struct timer3
 			else
 				TIMSK3 &= (1<<OCIE3C);
 		}
+		static bool matched() { return TIFR3 & (1<<OCF3C); }
+		static void clear_matched() { TIFR3 = (1<<OCF3C); }
 	};
 #endif
 
