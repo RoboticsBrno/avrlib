@@ -115,15 +115,16 @@ public:
 			this->intr_rx();
 	}
 
-	void intr_rx()
+	bool intr_rx()
 	{
 		if(m_usart.frame_error())
 		{
 			m_usart.recv();
-			return;
+			return false;
 		}
 		value_type v = m_bootseq.check(m_usart.recv());
 		m_rx_buffer.push(v);
+		return true;
 	}
 
 	void process_tx()
@@ -144,6 +145,9 @@ public:
 
 	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
 	rx_buffer_type & rx_buffer() { return m_rx_buffer; }
+		
+	typedef buffer<value_type, TxBufferSize> tx_buffer_type;
+	tx_buffer_type & tx_buffer() { return m_tx_buffer; }
 
 	usart_type & usart() { return m_usart; }
 	usart_type const & usart() const { return m_usart; }
