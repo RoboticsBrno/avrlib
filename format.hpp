@@ -340,6 +340,35 @@ private:
 	char const * m_last;
 };
 
+class pgm_string_literal_range
+{
+public:
+	pgm_string_literal_range(char const * pattern)
+		: m_pattern(pattern), m_top(pgm_read_byte(m_pattern))
+	{
+	}
+
+	bool empty() const
+	{
+		return m_top == 0;
+	}
+
+	char top() const
+	{
+		return m_top;
+	}
+
+	void pop()
+	{
+		++m_pattern;
+		m_top = pgm_read_byte(m_pattern);
+	}
+
+private:
+	char const * m_pattern;
+	char m_top;
+};
+
 template <typename Stream>
 format_impl<Stream, string_literal_range> format(Stream & out, char const * pattern)
 {
@@ -352,6 +381,12 @@ format_impl<Stream, pgm_literal_range> format_pgm(Stream & out, char const (&pat
 	return format_impl<Stream, pgm_literal_range>(out, pgm_literal_range(pattern, pattern + N - 1));
 }
 
+template <typename Stream>
+format_impl<Stream, pgm_string_literal_range> format_spgm(Stream & out, char const * pattern)
+{
+	return format_impl<Stream, pgm_string_literal_range>(out, pgm_string_literal_range(pattern));
 }
+
+} // namespace
 
 #endif
