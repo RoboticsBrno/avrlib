@@ -127,15 +127,17 @@ public:
 		return true;
 	}
 
-	void process_tx()
+	bool process_tx()
 	{
 		if (!m_tx_buffer.empty() && m_usart.tx_empty())
 		{
 			m_usart.send(m_tx_buffer.top());
 			m_tx_buffer.pop();
+			return true;
 		}
 
 		// TODO: flush the underlying port
+		return false;
 	}
 
 	bool tx_reserve(uint8_t size)

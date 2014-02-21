@@ -206,6 +206,14 @@ public:
 	{
 		this->write_literal();
 	}
+	
+	format_impl & operator%(const char& ch)
+	{
+		m_out.write(ch);
+		m_pattern.pop();
+		this->write_literal();
+		return *this;
+	}
 
 	format_impl & operator%(char const * str)
 	{
