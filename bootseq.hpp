@@ -1,30 +1,36 @@
 #ifndef AVRLIB_BOOTSEQ_HPP
 #define AVRLIB_BOOTSEQ_HPP
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
+#ifndef BOOTSEQ_RESET
+# include <avr/io.h>
+# include <avr/interrupt.h>
+#endif
 #include "nobootseq.hpp"
 
 namespace avrlib {
 
 inline void bootseq_reset()
 {
+#ifdef BOOTSEQ_RESET
+	BOOTSEQ_RESET();
+#else
 	cli();
-#if defined(WDTCR)
-# if defined(WDCE)
+# if defined(WDTCR)
+#  if defined(WDCE)
 	WDTCR = (1<<WDCE)|(1<<WDE);
-# else
+#  else
 	WDTCR = (1<<WDTOE)|(1<<WDE);
-# endif
+#  endif
 	WDTCR = (1<<WDE);
-#elif defined(WDTCSR)
+# elif defined(WDTCSR)
 	WDTCSR = (1<<WDCE)|(1<<WDE);
 	WDTCSR = (1<<WDE);
-#elif __AVR_ARCH__ >= 100 /*xmega*/
+# elif __AVR_ARCH__ >= 100 /*xmega*/
 	CCP = CCP_IOREG_gc;
 	RST.CTRL = RST_SWRST_bm;
-#else
-# error Unsupported Watchdog timer interface.
+# else
+#  error Unsupported Watchdog timer interface.
+# endif
 #endif
 	for (;;)
 	{
