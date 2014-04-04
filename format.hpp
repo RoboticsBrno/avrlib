@@ -2,7 +2,9 @@
 #define AVRLIB_FORMAT_HPP
 
 #include <stdint.h>
-#include <avr/pgmspace.h>
+#ifdef _AVR_IO_H_
+# include <avr/pgmspace.h>
+#endif
 
 namespace avrlib {
 
@@ -320,6 +322,8 @@ private:
 	char const * m_pattern;
 };
 
+#ifdef _AVR_IO_H_
+
 class pgm_literal_range
 {
 public:
@@ -377,12 +381,6 @@ private:
 	char m_top;
 };
 
-template <typename Stream>
-format_impl<Stream, string_literal_range> format(Stream & out, char const * pattern)
-{
-	return format_impl<Stream, string_literal_range>(out, string_literal_range(pattern));
-}
-
 template <typename Stream, int N>
 format_impl<Stream, pgm_literal_range> format_pgm(Stream & out, char const (&pattern)[N])
 {
@@ -393,6 +391,14 @@ template <typename Stream>
 format_impl<Stream, pgm_string_literal_range> format_spgm(Stream & out, char const * pattern)
 {
 	return format_impl<Stream, pgm_string_literal_range>(out, pgm_string_literal_range(pattern));
+}
+
+#endif // ifdef _AVR_IO_H_
+
+template <typename Stream>
+format_impl<Stream, string_literal_range> format(Stream & out, char const * pattern)
+{
+	return format_impl<Stream, string_literal_range>(out, string_literal_range(pattern));
 }
 
 } // namespace
