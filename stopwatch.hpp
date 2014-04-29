@@ -48,13 +48,16 @@ typename Timer::time_type wait(Timer & timer, typename Timer::time_type time, Pr
 		typename Timer::time_type new_base = timer.value();
 		typename Timer::time_type difference = new_base - base;
 		if (time < difference)
-			return base_time - time;
+			return 0;
 		time -= difference;
 		base = new_base;
 		if(process())
-			return base_time - time;
+		{
+			typename Timer::time_type res = timer.value() - base_time;
+			return res == 0 ? 1 : res;
+		}
 	}
-	return timer.value() - base_time;
+	return 0;
 }
 
 template <typename Timer>
