@@ -237,6 +237,14 @@ public:
 	}
 #endif
 
+	format_impl & operator%(const bool& v)
+	{
+		m_out.write(v ? '1' : '0');
+		m_pattern.pop();
+		this->write_literal();
+		return *this;
+	}
+
 	template <typename T>
 	format_impl & operator%(T const & t)
 	{
