@@ -1,7 +1,9 @@
 #ifndef AVRLIB_ASSERT_HPP
 #define AVRLIB_ASSERT_HPP
 
-#include <avr/interrupt.h>
+#ifdef _AVR_IO_H_
+ #include <avr/interrupt.h>
+#endif
 
 namespace avrlib {
 
