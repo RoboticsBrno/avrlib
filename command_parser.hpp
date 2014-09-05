@@ -116,7 +116,7 @@ public:
 
 private:
 	Timer const & m_timer;
-	time_type const & m_timeout;
+	time_type /*const &*/ m_timeout;
 
 	time_type m_last_push;
 };
