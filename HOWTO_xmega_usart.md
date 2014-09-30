@@ -73,6 +73,8 @@ Budeme potřebovat:
 Vložení potřebných knihoven
 ---------------------------
 
+Knihovnu Avrlib lze stáhnout [zde][http://technika.junior.cz/hg/avrlib/archive/57de39d37122.zip]. Tento archiv je potřeba rozbalit do složky s projektem (tam kde je soubor nazev_projektu.c nebo nazev_projektu.cpp) a následně je nutné složku přejmenovat z názvu _avrlib-XXxxXXxXXXXX_ na _avrlib_ (jinak budete mít problémy s kompilací).
+
 Jako první je třeba _includovat_ knihovny avrlibu, které se starají o obsluhu USARTu.
 
 	#include "avrlib/uart_xmega.hpp"
@@ -113,7 +115,7 @@ Otevření USARTu
 Použití
 -------
 
-Nyní už můžeme používat všelijaké funkce typu _send()_, _send_bin()_, _format()_, metodu _write()_ a další (viz knihovna format.hpp).
+Nyní už můžeme používat všelijaké funkce typu _send()_, _send_bin()_, _format()_, metodu _write()_ a další (funkce format() - složitější použití -> popíšeme v budoucnu).
 
 	debug.write(0xFF);
 	send(debug, "Ahoj\n");
@@ -135,7 +137,7 @@ Kompletní program
     
     async_usart<uart_xmega, 32, 64> debug; 
     
-    void main()
+    int main(void)
     {
        	// Run at 32 MHz
         OSC.CTRL = OSC_RC32MEN_bm | OSC_RC2MEN_bm | OSC_RC32KEN_bm;
@@ -157,11 +159,11 @@ Kompletní program
         pin_debug_rx::pullup();
         pin_debug_tx::make_high();
         
-        debug.usart().open(USARTC0, (-1 << 12)|102); aktuálně odpovídá 38400; pro rychlost 115200: (-3 << 12)|131); 
+        debug.usart().open(USARTC0, (-1 << 12)|102); // aktuálně odpovídá 38400; pro rychlost 115200: (-3 << 12)|131); 
         
         debug.write(0xFF);
         send(debug, "Ahoj\n");
-        format(debug, "Vrchol zásobníku je: %") % SP;
+        send_int(debug, SP);
         debug.flush();
         
         /*
@@ -172,11 +174,16 @@ Kompletní program
             - otevře usartu
             - předá do odesílacího bufferu jeden bajt 0xFF
             - předá do odesílacího bufferu řetězec "Ahoj"
-            - předá do odesílacího bufferu řetězec "Vrchol zásobníku je: " a hodnotu proměnné SP
+            - předá do odesílacího bufferu hodnotu registru SP a ta se zobrazí jako číslo
             - odešle data z odesílacího bufferu po sériové lince ven z čipu
         */
     }
     
+
+Kontakt
+-----------------
+
+V případě nejasnosti, nefunkčnosti nebo jakéhokoliv jiného problému mě kontaktujte na email: _<mailto:paral@robotikabrno.cz>_
 
 
 [calc]: http://www.avrcalc.elektronik-projekt.de/xmega/baud_rate_calculator "Xmega Baud Rate Calculator"
