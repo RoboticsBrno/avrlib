@@ -127,4 +127,41 @@ struct pin_buffer_with_oe
 };
 
 
+struct pin_t
+{
+	pin_t(PORT_t& port, const uint8_t& pin)
+		:port(port), bp(pin), bm(1<<pin)
+	{}
+	pin_t(const pin_t& pin)
+		:port(pin.port), bp(pin.bp), bm(pin.bm)
+	{}
+	void make_input() { port.DIRCLR = bm; }
+	void make_high() { port.OUTSET = bm; port.DIRSET = bm; }
+	void make_low() { port.OUTCLR = bm; port.DIRSET = bm; }
+	void make_output() { port.DIRSET = bm; }
+	void set_value(uint8_t value) { if (value) port.OUTSET = bm; else port.OUTCLR = bm; }
+	void set_high() { port.OUTSET = bm; }
+	void set_low() { port.OUTCLR = bm; }
+	uint8_t get_value() { return (port.OUT & bm) != 0; }
+	void toggle() { port.OUTTGL = bm; }
+	void pullup() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc; }
+	void pulldown() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_PULLDOWN_gc; }
+	void wiredor() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_WIREDOR_gc; }
+	void wiredand() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_WIREDAND_gc; }
+	void wiredor_pull() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_WIREDORPULL_gc; }
+	void wiredand_pull() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_WIREDANDPULL_gc; }
+	void totem() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_TOTEM_gc; }
+	void buskeeper() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_BUSKEEPER_gc; }
+	bool read() { return (port.IN & bm) != 0; }
+	void pinctrl(uint8_t v) { *(&port.PIN0CTRL + bp) = v; }
+	void make_inverted() { *(&port.PIN0CTRL + bp) |= PORT_INVEN_bm; }
+	void make_noninverted() { *(&port.PIN0CTRL + bp) &= ~PORT_INVEN_bm; }
+	void slew_rate_limit_enable() { *(&port.PIN0CTRL + bp) |= PORT_SRLEN_bm; }
+	void slew_rate_limit_disable() { *(&port.PIN0CTRL + bp) &= ~PORT_SRLEN_bm; }
+	
+	PORT_t& port;
+	uint8_t const bp;
+	uint8_t const bm;
+};
+
 #endif // AVRLIB_XMEGA_PIN_HPP
