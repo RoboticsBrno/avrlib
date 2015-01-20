@@ -52,6 +52,7 @@
 		static void tov_level(const uint8_t& lvl) \
 		{ \
 			ovf_int_lvl = (lvl & TC0_OVFINTLVL_gm); \
+			timer##_INTFLAGS = TC0_OVFIF_bm; \
 			timer##_INTCTRLA = (timer##_INTCTRLA & ~TC0_OVFINTLVL_gm) | ovf_int_lvl; \
 		} \
 		static volatile uint8_t value_bits; \
