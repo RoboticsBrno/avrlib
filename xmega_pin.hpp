@@ -158,6 +158,16 @@ struct pin_t
 	void make_noninverted() { *(&port.PIN0CTRL + bp) &= ~PORT_INVEN_bm; }
 	void slew_rate_limit_enable() { *(&port.PIN0CTRL + bp) |= PORT_SRLEN_bm; }
 	void slew_rate_limit_disable() { *(&port.PIN0CTRL + bp) &= ~PORT_SRLEN_bm; }
+	void intr0_en(uint8_t v) { if(v) port.INT0MASK |= bm; else port.INT0MASK &= ~bm; }
+	void intr1_en(uint8_t v) { if(v) port.INT1MASK |= bm; else port.INT1MASK &= ~bm; }
+	void intr_en(uint8_t n, uint8_t en)
+	{
+		switch(n)
+		{
+			case 0: intr0_en(en); break;
+			case 1: intr1_en(en); break;
+		}
+	}
 	
 	PORT_t& port;
 	uint8_t const bp;
