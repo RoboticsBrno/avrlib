@@ -123,6 +123,16 @@ public:
 		return uart_data_bits_t(m_p->CTRLC & USART_CHSIZE_gm);
 	}
 	
+	void usart(USART_t & p)
+	{
+		m_p = &p;
+	}
+	
+	USART_t* usart()
+	{
+		return m_p;
+	}
+	
 private:
 	USART_t * m_p;
 };
