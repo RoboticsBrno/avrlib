@@ -15,12 +15,21 @@ void send(Stream & s, char const * str)
 		s.write(*str);
 }
 
+#ifdef __PGMSPACE_H_
+template <typename Stream>
+void send_spgm(Stream & s, char const * str)
+{
+	for (; pgm_read_byte(str) != 0; ++str)
+		s.write(pgm_read_byte(str));
+}
+#endif
+
 #ifdef AVRLIB_STRING_HPP
 template <typename Stream>
 void send(Stream & s, const string& str)
 {
 	for (AVRLIB_STRING_SIZE_TYPE i = 0; i != str.size(); ++i)
-	s.write(str[i]);
+		s.write(str[i]);
 }
 #endif
 
