@@ -48,6 +48,16 @@ public:
 	{
 		return m_buffer[m_rptr];
 	}
+	
+	volatile value_type const & top_ref() const
+	{
+		return m_buffer[m_rptr];
+	}
+	
+	volatile value_type & top_ref()
+	{
+		return m_buffer[m_rptr];
+	}
 
 	index_type size() const
 	{
