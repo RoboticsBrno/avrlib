@@ -228,6 +228,11 @@ public:
 		this->clear();
 		m_timeout = new_timeout;
 	}
+	
+	time_type remaining() const
+	{
+		return *this ? 0 : (m_timeout - (*this)());
+	}
 
 private:
 	volatile time_type m_timeout;
