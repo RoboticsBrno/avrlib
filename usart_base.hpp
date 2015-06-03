@@ -6,7 +6,7 @@ namespace avrlib {
 template <uint32_t speed>
 struct ubrr
 {
-	static uint16_t const value = ((F_CPU / (4 * speed) + 1) >> 1) - 1;;
+	static uint16_t const value = ((F_CPU / (4 * speed) + 1) >> 1) - 1;
 };
 
 namespace detail {
