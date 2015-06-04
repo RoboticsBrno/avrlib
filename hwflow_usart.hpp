@@ -106,6 +106,77 @@ private:
 	buffer<value_type, TxBufferSize> m_tx_buffer;
 };
 
+
+template <typename Usart, int RxBufferSize, int TxBufferSize, int RxEmptyLevel, int RxFullLevel, intr_prio_t RxPrio, typename PinRtr, typename PinCts, typename Bootseq = nobootseq>
+class enhanced_hwflow_usart
+	: public hwflow_usart<Usart, RxBufferSize, TxBufferSize, RxPrio, PinRtr, PinCts>
+{
+public:
+	typedef Usart usart_type;
+	typedef typename usart_type::value_type value_type;
+	
+	typedef Bootseq bootseq_type;
+
+	template <typename T1>
+	enhanced_hwflow_usart(T1 const & t1)
+	{
+		this->usart().open(t1);
+	}
+
+	template <typename T1, typename T2>
+	enhanced_hwflow_usart(T1 const & t1, T2 const & t2)
+	{
+		this->usart().open(t1, t2);
+	}
+
+	value_type read()
+	{
+		while (this->rx_buffer().empty())
+		{
+		}
+		
+		value_type res = this->rx_buffer().top();
+		this->rx_buffer().pop();
+
+		if (this->rx_buffer().size() < RxEmptyLevel)
+			PinRtr::set_low();
+		this->usart().rx_intr(RxPrio);
+		return res;
+	}
+
+	bool intr_rx()
+	{
+		if(this->usart().frame_error())
+		{
+			this->usart().recv();
+			return false;
+		}
+		value_type v = m_bootseq.check(this->usart().recv());
+		this->rx_buffer().push(v);
+
+		if (this->rx_buffer().size() >= RxFullLevel)
+		{
+			PinRtr::set_high();
+			this->usart().rx_intr(intr_disabled);
+		}
+		return true;
+	}
+	
+	void flush()
+	{
+		bool tx_empty = false;
+		while (!tx_empty)
+		{
+			cli();
+			this->process_tx();
+			tx_empty = this->tx_empty();
+			sei();
+		}
+	}
+private:
+	bootseq_type m_bootseq;
+};
+
 }
 
 #endif
