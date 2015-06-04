@@ -37,11 +37,12 @@ public:
 		return this->next(m_wptr) == m_rptr;
 	}
 
-	void push(value_type v)
+	bool push(value_type v)
 	{
 		index_type wptr = m_wptr;
 		m_buffer[wptr] = v;
 		m_wptr = this->next(wptr);
+		return m_wptr != m_rptr;
 	}
 
 	value_type top() const

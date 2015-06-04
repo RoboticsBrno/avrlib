@@ -104,6 +104,7 @@ public:
 	uint8_t operator[](uint8_t index) const { return m_rx_buffer[index]; }
 		
 	uint8_t* get_rx_buffer() { return m_rx_buffer; }
+	uint8_t* get_buffer() { return m_rx_buffer; }
 		
 	uint8_t* get_tx_buffer() { return m_tx_buffer; }
 

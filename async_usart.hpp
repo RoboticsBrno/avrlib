@@ -117,13 +117,18 @@ public:
 
 	bool intr_rx()
 	{
+		if(m_usart.overflow())
+			++m_overflow;
 		if(m_usart.frame_error())
 		{
 			m_usart.recv();
 			return false;
 		}
 		value_type v = m_bootseq.check(m_usart.recv());
-		m_rx_buffer.push(v);
+		if(!m_rx_buffer.push(v))
+		{
+			++m_overflow;
+		}
 		return true;
 	}
 
@@ -155,6 +160,9 @@ public:
 	{
 		return TxBufferSize - m_tx_buffer.size() > size;
 	}
+	
+	overflow_type overflow() const { return m_overflow; }
+	void clear_overflow() { m_overflow = 0; }
 
 	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
 	rx_buffer_type & rx_buffer() { return m_rx_buffer; }
@@ -170,6 +178,7 @@ private:
 	buffer<value_type, RxBufferSize> m_rx_buffer;
 	buffer<value_type, TxBufferSize==0?1:TxBufferSize> m_tx_buffer;
 	bootseq_type m_bootseq;
+	volatile overflow_type m_overflow;
 };
 
 }
