@@ -83,6 +83,34 @@ struct inv_pin
 	static void pullup() { set_low(); }
 };
 
+template <bool Value>
+struct dummy_pin
+{
+	static void set(bool) {}
+
+	static void clear() {}
+		
+	static void toggle() {}
+
+	static bool get() { return Value; }
+
+	static bool value() { return Value; }
+
+	static void output(bool) {}
+
+	static bool output() { return false; }
+
+	static void make_output() {}
+	static void make_input() {}
+	static void make_low() {}
+	static void make_high() {}
+	static void set_value(bool) {}
+	static void set_high() {}
+	static void set_low() {}
+	static bool read() { return Value; }
+	static void pullup() {}
+};
+
 }
 
 #endif
