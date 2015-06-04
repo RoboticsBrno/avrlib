@@ -11,7 +11,7 @@ public:
 	enum state_t { bad, ready, simple_command, header, st_data };
 
 	command_parser()
-		: m_state(bad), m_cmd(0), m_cmd_size(0), m_size(0)
+		: m_state(bad), m_cmd(0), m_cmd_size(0), m_size(0), m_tx_ptr(0), m_err_cnt(0)
 	{
 	}
 
@@ -22,7 +22,9 @@ public:
 
 	uint8_t command() const { return m_cmd; }
 	uint8_t size() const { return m_size; }
-	uint8_t const * data() const { return m_buffer; }
+	uint8_t const * data() const { return m_rx_buffer; }
+	uint16_t error_cnt() const { return m_err_cnt; }
+	void clear_error_cnt() { m_err_cnt = 0; }
 
 	uint8_t push_data(uint8_t ch)
 	{
@@ -59,7 +61,7 @@ public:
 			break;
 
 		case st_data:
-			m_buffer[m_size++] = ch;
+			m_rx_buffer[m_size++] = ch;
 			m_state = m_cmd_size == m_size? ready: st_data;
 			break;
 
@@ -68,19 +70,42 @@ public:
 		}
 
 		if (m_state == bad)
+		{
+			++m_err_cnt;
 			return 254;
+		}
 
 		if (m_state == simple_command || m_state == ready)
 			return m_cmd;
 
 		return 255;
 	}
+	
+	bool write(const uint8_t& v)
+	{
+		if(m_tx_ptr == 15)
+			return false;
+		m_tx_buffer[m_tx_ptr] = v;
+		++m_tx_ptr;
+		return true;
+	}
+	
+	template <typename Usart>
+	void send(Usart& usart, const uint8_t& cmd)
+	{
+		usart.write(0x80);
+		usart.write(((cmd & 0x0F)<<4) | m_tx_ptr);
+		for(uint8_t i = 0; i != m_tx_ptr; ++i)
+			usart.write(m_tx_buffer[i]);
+	}
 
 	state_t state() const { return m_state; }
 
-	uint8_t operator[](uint8_t index) const { return m_buffer[index]; }
+	uint8_t operator[](uint8_t index) const { return m_rx_buffer[index]; }
 		
-	uint8_t* get_buffer() { return m_buffer; }
+	uint8_t* get_rx_buffer() { return m_rx_buffer; }
+		
+	uint8_t* get_tx_buffer() { return m_tx_buffer; }
 
 private:
 	state_t m_state;
@@ -88,8 +113,11 @@ private:
 	uint8_t m_cmd;
 	uint8_t m_cmd_size;
 
-	uint8_t m_buffer[16];
+	uint8_t m_rx_buffer[16];
+	uint8_t m_tx_buffer[16];
 	uint8_t m_size;
+	uint8_t m_tx_ptr;
+	uint16_t m_err_cnt;
 };
 
 template <typename Timer, typename Time = typename Timer::time_type>
