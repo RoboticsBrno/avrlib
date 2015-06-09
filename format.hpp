@@ -220,6 +220,8 @@ public:
 	
 	format_impl & operator%(const char& ch)
 	{
+		if(m_pattern.empty())
+			return *this;
 		m_out.write(ch);
 		m_pattern.pop();
 		this->write_literal();
@@ -228,6 +230,8 @@ public:
 
 	format_impl & operator%(char const * str)
 	{
+		if(m_pattern.empty())
+			return *this;
 		while (*str)
 			m_out.write(*str++);
 		m_pattern.pop();
@@ -238,6 +242,8 @@ public:
 #ifdef AVRLIB_STRING_HPP	
 	format_impl & operator%(const string& str)
 	{
+		if(m_pattern.empty())
+			return *this;
 		for(string::size_t i = 0; i != str.size(); ++i)
 			m_out.write(str[i]);
 		m_pattern.pop();
@@ -248,6 +254,8 @@ public:
 
 	format_impl & operator%(const bool& v)
 	{
+		if(m_pattern.empty())
+			return *this;
 		m_out.write(v ? '1' : '0');
 		m_pattern.pop();
 		this->write_literal();
@@ -257,6 +265,8 @@ public:
 	template <typename T>
 	format_impl & operator%(T const & t)
 	{
+		if(m_pattern.empty())
+			return *this;
 		char f = m_pattern.top();
 		bool hex =  false;
 		uint8_t width = 0;
