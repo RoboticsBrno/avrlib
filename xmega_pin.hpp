@@ -32,6 +32,7 @@
 		static void buskeeper() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_BUSKEEPER_gc; } \
 		static bool read() { return (port##_IN & (1<<(pin))) != 0; } \
 		static void pinctrl(uint8_t v) { port##_PIN##pin##CTRL = v; } \
+		static uint8_t pinctrl() { return port##_PIN##pin##CTRL; } \
 		static void make_inverted() { port##_PIN##pin##CTRL |= PORT_INVEN_bm; } \
 		static void make_noninverted() { port##_PIN##pin##CTRL &= ~PORT_INVEN_bm; } \
 		static void slew_rate_limit_enable() { port##_PIN##pin##CTRL |= PORT_SRLEN_bm; } \
@@ -156,6 +157,7 @@ struct pin_t
 	void buskeeper() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_BUSKEEPER_gc; }
 	bool read() const { return (port.IN & bm) != 0; }
 	void pinctrl(uint8_t v) { *(&port.PIN0CTRL + bp) = v; }
+	uint8_t pinctrl() const { return *(&port.PIN0CTRL + bp); }
 	void make_inverted() { *(&port.PIN0CTRL + bp) |= PORT_INVEN_bm; }
 	void make_noninverted() { *(&port.PIN0CTRL + bp) &= ~PORT_INVEN_bm; }
 	void slew_rate_limit_enable() { *(&port.PIN0CTRL + bp) |= PORT_SRLEN_bm; }
