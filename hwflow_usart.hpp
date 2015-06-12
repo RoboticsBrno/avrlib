@@ -96,7 +96,10 @@ public:
 
 	typedef buffer<value_type, RxBufferSize> rx_buffer_type;
 	rx_buffer_type & rx_buffer() { return m_rx_buffer; }
-
+		
+	typedef buffer<value_type, TxBufferSize> tx_buffer_type;
+	tx_buffer_type & tx_buffer() { return m_tx_buffer; }
+		
 	usart_type & usart() { return m_usart; }
 	usart_type const & usart() const { return m_usart; }
 
