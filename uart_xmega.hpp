@@ -4,6 +4,8 @@
 #include <avr/io.h>
 #include <stdint.h>
 
+#include "usart_base.hpp"
+
 namespace avrlib {
 	
 enum uart_data_bits_t
@@ -132,6 +134,27 @@ public:
 	{
 		return m_p;
 	}
+	
+	void rxc_interrupt(const uart_interrupt_priority_t& priority)
+	{
+		m_p->CTRLA = (m_p->CTRLA & ~USART_RXCINTLVL_gm) | (priority<<USART_RXCINTLVL_gp);
+	}
+	
+	bool rxc_interrupt() const { return (m_p->CTRLA & USART_RXCINTLVL_gm) != 0; }
+	
+	void txc_interrupt(const uart_interrupt_priority_t& priority)
+	{
+		m_p->CTRLA = (m_p->CTRLA & ~USART_TXCINTLVL_gm) | (priority<<USART_TXCINTLVL_gp);
+	}
+	
+	bool tx_interrupt() const { return (m_p->CTRLA & USART_TXCINTLVL_gm) != 0; }
+	
+	void dre_interrupt(const uart_interrupt_priority_t& priority)
+	{
+		m_p->CTRLA = (m_p->CTRLA & ~USART_DREINTLVL_gm) | (priority<<USART_DREINTLVL_gp);
+	}
+	
+	bool dre_interrupt() const { return (m_p->CTRLA & USART_DREINTLVL_gm) != 0; }
 	
 private:
 	USART_t * m_p;

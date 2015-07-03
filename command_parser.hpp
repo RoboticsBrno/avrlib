@@ -81,12 +81,14 @@ public:
 		return 255;
 	}
 	
-	bool write(const uint8_t& v)
+	template <typename T>
+	bool write(const T& v)
 	{
-		if(m_tx_ptr == 15)
+		if(m_tx_ptr >= (16 - sizeof(v)))
 			return false;
-		m_tx_buffer[m_tx_ptr] = v;
-		++m_tx_ptr;
+		uint8_t const* begin = reinterpret_cast<uint8_t const*>(&v);
+		for(const uint8_t end = m_tx_ptr + sizeof(v); m_tx_ptr != end; ++m_tx_ptr, ++begin)
+			m_tx_buffer[m_tx_ptr] = *begin;
 		return true;
 	}
 	
@@ -97,11 +99,15 @@ public:
 		usart.write(((cmd & 0x0F)<<4) | m_tx_ptr);
 		for(uint8_t i = 0; i != m_tx_ptr; ++i)
 			usart.write(m_tx_buffer[i]);
+		m_tx_ptr = 0;
 	}
 
 	state_t state() const { return m_state; }
 
 	uint8_t operator[](uint8_t index) const { return m_rx_buffer[index]; }
+		
+	template <typename T>
+	T read(const uint8_t& index) const { return *reinterpret_cast<T*>(m_tx_buffer + index); }
 		
 	uint8_t* get_rx_buffer() { return m_rx_buffer; }
 	uint8_t* get_buffer() { return m_rx_buffer; }
@@ -210,6 +216,7 @@ public:
 			usart.write(m_tx_buffer[i]);
 		}
 		usart.write(chks);
+		m_tx_ptr = 0;
 	}
 	
 private:
@@ -241,7 +248,7 @@ public:
 	
 private:
 	Timer const & m_timer;
-	time_type /*const &*/ m_timeout;
+	time_type m_timeout;
 
 	time_type m_last_push;
 };
