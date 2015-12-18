@@ -35,6 +35,11 @@
 		static void make_noninverted() { port##_PIN##pin##CTRL &= ~PORT_INVEN_bm; } \
 		static void slew_rate_limit_enable() { port##_PIN##pin##CTRL |= PORT_SRLEN_bm; } \
 		static void slew_rate_limit_disable() { port##_PIN##pin##CTRL &= ~PORT_SRLEN_bm; } \
+		static void sence_both_edges() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_ISC_gm) | PORT_ISC_BOTHEDGES_gc; } \
+		static void sence_rising_edge() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_ISC_gm) | PORT_ISC_RISING_gc; } \
+		static void sence_faling_edge() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_ISC_gm) | PORT_ISC_FALLING_gc; } \
+		static void sence_level() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_ISC_gm) | PORT_ISC_LEVEL_gc; } \
+		static void input_disable() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_ISC_gm) | PORT_ISC_INPUT_DISABLE_gc; } \
 	}
 
 template <typename PinHigh, typename PinLow>
@@ -158,6 +163,11 @@ struct pin_t
 	void make_noninverted() { *(&port.PIN0CTRL + bp) &= ~PORT_INVEN_bm; }
 	void slew_rate_limit_enable() { *(&port.PIN0CTRL + bp) |= PORT_SRLEN_bm; }
 	void slew_rate_limit_disable() { *(&port.PIN0CTRL + bp) &= ~PORT_SRLEN_bm; }
+	void sence_both_edges() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_ISC_gm) | PORT_ISC_BOTHEDGES_gc; }
+	void sence_rising_edge() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_ISC_gm) | PORT_ISC_RISING_gc; }
+	void sence_faling_edge() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_ISC_gm) | PORT_ISC_FALLING_gc; }
+	void sence_level() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_ISC_gm) | PORT_ISC_LEVEL_gc; }
+	void input_disable() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_ISC_gm) | PORT_ISC_INPUT_DISABLE_gc; }
 	void intr0_en(uint8_t v) { if(v) port.INT0MASK |= bm; else port.INT0MASK &= ~bm; }
 	void intr1_en(uint8_t v) { if(v) port.INT1MASK |= bm; else port.INT1MASK &= ~bm; }
 	void intr_en(uint8_t n, uint8_t en)
