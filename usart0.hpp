@@ -123,6 +123,36 @@ public:
 		UCSR0A |= (1<<TXC0);
 		return true;
 	}
+	
+	void rxc_interrupt(const uart_interrupt_priority_t& priority)
+	{
+		if(priority != uart_intr_off)
+			UCSR0B |= (1<<RXCIE0);
+		else
+			UCSR0B &= ~(1<<RXCIE0);
+	}
+	
+	bool rxc_interrupt() const { return (UCSR0B & (1<<RXCIE0)) != 0; }
+	
+	void txc_interrupt(const uart_interrupt_priority_t& priority)
+	{
+		if(priority != uart_intr_off)
+			UCSR0B |= (1<<TXCIE0);
+		else
+			UCSR0B &= ~(1<<TXCIE0);
+	}
+	
+	bool tx_interrupt() const { return (UCSR0B & (1<<TXCIE0)) != 0; }
+	
+	void dre_interrupt(const uart_interrupt_priority_t& priority)
+	{
+		if(priority != uart_intr_off)
+			UCSR0B |= (1<<UDRIE0);
+		else
+			UCSR0B &= ~(1<<UDRIE0);
+	}
+	
+	bool dre_interrupt() const { return (UCSR0B & (1<<UDRIE0)) != 0; }
 };
 
 }
