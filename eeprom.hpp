@@ -5,23 +5,25 @@
 
 namespace avrlib {
 
-inline void load_eeprom(uint8_t address, uint8_t * ptr, uint8_t len)
+inline void load_eeprom(uint16_t address, uint8_t * ptr, uint8_t len)
 {
 	uint8_t * pend = ptr + len;
 
-	EEARH = 0;
-	EEARL = address;
-
 	while (ptr != pend)
 	{
+		address &= E2END;
+		EEARL = address & 0xFF;
+		EEARH = address >> 8;
+		
 		EECR = (1<<EERE);
 		*ptr++ = EEDR;
-		++EEARL;
+		
+		++address;
 	}
 }
 
 template <typename T>
-T load_eeprom(uint8_t address, T& data)
+T load_eeprom(uint16_t address, T& data)
 {
 	T res;
 	load_eeprom(address, (uint8_t *)&res, sizeof res);
@@ -29,7 +31,7 @@ T load_eeprom(uint8_t address, T& data)
 	return res;
 }
 
-inline void store_eeprom(uint8_t address, uint8_t const * ptr, uint8_t len)
+inline void store_eeprom(uint16_t address, uint8_t const * ptr, uint8_t len)
 {
 #ifndef EEMWE
 # define EEMWE_ EEMPE
@@ -41,11 +43,13 @@ inline void store_eeprom(uint8_t address, uint8_t const * ptr, uint8_t len)
 
 	uint8_t const * pend = ptr + len;
 
-	EEARH = 0;
-	EEARL = address;
-
 	while (ptr != pend)
 	{
+		address &= E2END;
+
+		EEARL = address & 0xFF;
+		EEARH = address >> 8;
+		
 		EEDR = *ptr++;
 
 		EECR = (1<<EEMWE_);
@@ -55,7 +59,7 @@ inline void store_eeprom(uint8_t address, uint8_t const * ptr, uint8_t len)
 		{
 		}
 
-		++EEARL;
+		++address;
 	}
 
 #undef EEMWE_
@@ -63,7 +67,7 @@ inline void store_eeprom(uint8_t address, uint8_t const * ptr, uint8_t len)
 }
 
 template <typename T>
-void store_eeprom(uint8_t address, T value)
+void store_eeprom(uint16_t address, T value)
 {
 	store_eeprom(address, (uint8_t const *)&value, sizeof value);
 }
