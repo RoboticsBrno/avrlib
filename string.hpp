@@ -11,6 +11,12 @@ namespace avrlib {
 #define AVRLIB_STRING_SIZE_TYPE uint8_t
 #endif
 
+#if __cplusplus <= 199711L
+	#define AVRLIB_STRING_NULLPTR NULL
+#else
+	#define AVRLIB_STRING_NULLPTR nullptr
+#endif
+
 // #ifndef npos
 // #define npos ((AVRLIB_STRING_SIZE_TYPE) -1)
 // #endif
@@ -130,7 +136,7 @@ public:
 	
 	inline const T& operator[](AVRLIB_STRING_SIZE_TYPE index) const volatile
 	{
-		return *const_cast<char*>(m_data+index);
+		return *const_cast<T*>(m_data+index);
 	}
 
 	inline T& operator[](AVRLIB_STRING_SIZE_TYPE index)
@@ -165,10 +171,12 @@ public:
 	basic_string<T, _alloc_space>& append(const basic_string<T, _alloc_space>& str, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n)
 	{
 		return append(str.substr(pos, n));
-	}//FIX ME
+	}//FIX ME - should be optimised
 	
 	basic_string<T, _alloc_space>& append(const T* s, AVRLIB_STRING_SIZE_TYPE n)
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
 		n = (_alloc_space - _length) < n? (_alloc_space - _length) : n; 
 		for(AVRLIB_STRING_SIZE_TYPE i = 0; i != n; ++i, ++_length)
 			m_data[_length] = *(s + i);
@@ -177,6 +185,8 @@ public:
 	
 	basic_string<T, _alloc_space>& append(const T* s)
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
 		for(; _length != _alloc_space && *s != 0; ++s, ++_length)
 			m_data[_length] = *s;
 		return *this;
@@ -241,10 +251,12 @@ public:
 	basic_string<T, _alloc_space>& assign(const basic_string<T, _alloc_space>& str, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n)
 	{
 		return assign(str.substr(pos, n));
-	}//FIX ME
+	}//FIX ME - should be optimised
 	
 	basic_string<T, _alloc_space>& assign(const T* s, AVRLIB_STRING_SIZE_TYPE n)
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
 		n = _alloc_space < n? _alloc_space : n;
 		for (_length = 0; _length != n; ++_length, ++s)
 			m_data[_length] = *s;
@@ -253,6 +265,8 @@ public:
 	
 	basic_string<T, _alloc_space>& assign(const T* s)
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
 		for(_length = 0; _length != _alloc_space && *s != 0; ++s, ++_length)
 			m_data[_length] = *s;
 		return *this;
@@ -383,7 +397,7 @@ public:
 	
 //replace
 //if sum of non replaced part of this strings and substituting string is too long, end of final string will be cut off
-//NOT OPTIMALIZED!!!
+//NOT OPTIMISED!!!
 
 	basic_string<T, _alloc_space>& replace ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1,   const basic_string<T, _alloc_space>& str )
 	{
@@ -449,7 +463,7 @@ public:
 	}
 	
 //swap
-//NOT OPTIMALIZED!!!
+//NOT OPTIMISED!!!
 
 	void swap (basic_string<T, _alloc_space>& str)
 	{
@@ -469,6 +483,8 @@ public:
 
 	AVRLIB_STRING_SIZE_TYPE copy( T* s, AVRLIB_STRING_SIZE_TYPE n, AVRLIB_STRING_SIZE_TYPE pos = 0) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return 0;
 		n = n > (_length - pos) ? (_length - pos) : n;
 		for(AVRLIB_STRING_SIZE_TYPE i = 0; i != n; ++i)
 			*(s + i) = m_data[pos + i];
@@ -479,30 +495,58 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find(const basic_string<T, _alloc_space>& str,  AVRLIB_STRING_SIZE_TYPE pos = 0) const
 	{
-		if (str.empty() || str.length > _length || pos >= _length)
+		if (str.empty() || pos >= _length || str.length() > _length || str.length() > (_length - pos))
 			return npos;
 		for(;;)
 		{
 			for(; pos != _length; ++pos)
 				if (m_data[pos] == str[0])
 					break;
-			if (pos == _length || (pos + str.length()) > _length)
+			if (str.length() > (_length - pos))
 				return npos;
-			for(AVRLIB_STRING_SIZE_TYPE j = 0; m_data[pos + j] == str[j]; ++j)
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j] == str[j]; ++j)
 				if (j == str.length())
 					return pos;
 			++pos;
 		}
 	}
 	
-	//function AVRLIB_STRING_SIZE_TYPE find(const T* s, AVRLIB_STRING_SIZE_TYPE pos) const
-	//is implemented by function above, because constructor for C_string exist
+	AVRLIB_STRING_SIZE_TYPE find(const T* s, AVRLIB_STRING_SIZE_TYPE pos = 0) const
+	{
+		if(pos >= _length || s == AVRLIB_STRING_NULLPTR || s[0] == 0)
+			return npos;
+		for(;;)
+		{
+			for(; pos != _length; ++pos)
+				if (m_data[pos] == s[0])
+					break;
+			if (pos == _length)
+				return npos;
+			AVRLIB_STRING_SIZE_TYPE j = 1;
+			for(; (pos + j) != _length && m_data[pos + j] == s[j] && s[j] != 0; ++j);
+			if (s[j] == 0)
+				return pos;
+			++pos;
+		}
+	}
 	
 	AVRLIB_STRING_SIZE_TYPE find(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
 	{
-		const basic_string<T, _alloc_space> temp (s, n);
-		return find(temp, pos);
-	}//FIX ME
+		if(s == AVRLIB_STRING_NULLPTR || n == 0 || pos >= _length || n > _length || n > (_length - pos))
+			return npos;
+		for(;;)
+		{
+			for(; pos != _length; ++pos)
+				if (m_data[pos] == s[0])
+					break;
+			if (n > (_length - pos))
+				return npos;
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j] == s[j]; ++j)
+				if (j == n)
+					return pos;
+			++pos;
+		}
+	}
 	
 	AVRLIB_STRING_SIZE_TYPE find(const T c,  AVRLIB_STRING_SIZE_TYPE pos = 0) const
 	{
@@ -516,7 +560,6 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE rfind(const basic_string<T, _alloc_space>& str,  AVRLIB_STRING_SIZE_TYPE pos = npos) const
 	{
-		
 		if (str.empty() || str.length() > _length)
 			return npos;
 		if (pos > (_length - str.length()))
@@ -529,21 +572,59 @@ public:
 					break;
 			if (pos == 0)
 				return npos;
-			for(AVRLIB_STRING_SIZE_TYPE j = 0; m_data[pos + j - 1] == str[j]; ++j)
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j - 1] == str[j]; ++j)
 				if (j == str.length())
 					return pos - 1;
 			--pos;
 		}
 	}
 	
-	//function AVRLIB_STRING_SIZE_TYPE rfind(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
-	//is implemented by function above, because constructor for C_string exist
+	AVRLIB_STRING_SIZE_TYPE rfind(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
+	{
+		if(s == AVRLIB_STRING_NULLPTR || s[0] == 0)
+			return npos;
+		AVRLIB_STRING_SIZE_TYPE len = strlen(s);
+		if (len > _length)
+			return npos;
+		if (pos > (_length - len))
+			pos = (_length - len);
+		++pos;
+		for(;;)
+		{
+			for(; pos != 0; --pos)
+				if (m_data[pos - 1] == s[0])
+					break;
+			if (pos == 0)
+				return npos;
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j - 1] == s[j]; ++j)
+				if (j == len)
+					return pos - 1;
+			--pos;
+		}
+	}
 	
 	AVRLIB_STRING_SIZE_TYPE rfind(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
 	{
-		const basic_string<T, _alloc_space> temp (s, n);
-		return rfind(temp, pos);
-	}//FIX ME
+		if(s == AVRLIB_STRING_NULLPTR || s[0] == 0)
+			return npos;
+		if (n > _length)
+			return npos;
+		if (pos > (_length - n))
+			pos = (_length - n);
+		++pos;
+		for(;;)
+		{
+			for(; pos != 0; --pos)
+				if (m_data[pos - 1] == s[0])
+					break;
+			if (pos == 0)
+				return npos;
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j - 1] == s[j]; ++j)
+				if (j == n)
+					return pos - 1;
+			--pos;
+		}
+	}
 	
 	AVRLIB_STRING_SIZE_TYPE rfind(const T c,  AVRLIB_STRING_SIZE_TYPE pos = npos) const
 	{
@@ -572,7 +653,7 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_first_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
 	{
-		if (n == 0)
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
 			return npos;
 		for(; pos < _length; ++pos)
 			for(AVRLIB_STRING_SIZE_TYPE j = 0; j != n; ++j)
@@ -583,6 +664,8 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_first_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos = 0) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
 		for(; pos < _length; ++pos)
 			for(AVRLIB_STRING_SIZE_TYPE j = 0; *(s + j) != 0; ++j)
 				if (m_data[pos] == *(s + j))
@@ -618,7 +701,7 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_last_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
 	{
-		if (n == 0)
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
 			return npos;
 		if (pos > _length)
 			pos = _length;
@@ -633,6 +716,8 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_last_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
 		if (pos > _length)
 			pos = _length;
 		else
@@ -682,7 +767,7 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_first_not_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
 	{
-		if (n == 0)
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
 			return npos;
 		bool braked = false;
 		for(; pos < _length; ++pos)
@@ -704,6 +789,8 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_first_not_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos = 0) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
 		bool braked = false;
 		for(; pos < _length; ++pos)
 		{
@@ -734,7 +821,6 @@ public:
 
 	AVRLIB_STRING_SIZE_TYPE find_last_not_of(const basic_string<T, _alloc_space>& str,  AVRLIB_STRING_SIZE_TYPE pos = npos) const
 	{
-		
 		if (str.length() == 0)
 			return npos;
 		bool braked = false;
@@ -761,7 +847,7 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_last_not_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
 	{
-		if (n == 0)
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
 			return npos;
 		bool braked = false;
 		if (pos > _length)
@@ -787,6 +873,8 @@ public:
 	
 	AVRLIB_STRING_SIZE_TYPE find_last_not_of(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
 		bool braked = false;
 		if (pos > _length)
 			pos = _length;
@@ -853,6 +941,8 @@ public:
 	
 	int8_t compare ( const T* s ) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return empty() ? 0 : 1;
 		AVRLIB_STRING_SIZE_TYPE i = 0;
 		for(; i != _length; ++i)
 		{
@@ -891,6 +981,8 @@ public:
 	
 	int8_t compare ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1, const T* s) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return empty() ? 0 : 1;
 		n1 = (pos1 + n1) <= _length? n1 : (_length - pos1);
 		AVRLIB_STRING_SIZE_TYPE i = 0;
 		for(; i != n1; ++i)
@@ -931,6 +1023,8 @@ public:
 	
 	int8_t compare ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1, const T* s, AVRLIB_STRING_SIZE_TYPE n2) const
 	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return empty() ? 0 : 1;
 		n1 = (pos1 + n1) <= _length? n1 : (_length - pos1);
 		if (n1 < n2)
 			return -1;
@@ -947,9 +1041,476 @@ public:
 		}
 		return 0;
 	}
+
+// auxiliary static methods
+
+	static AVRLIB_STRING_SIZE_TYPE strlen(const T* s)
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return 0;
+		AVRLIB_STRING_SIZE_TYPE n = 0;
+		for (; *s != 0; ++s)
+			++n;
+		return n;
+	}
+	
+#ifdef __PGMSPACE_H_
+
+//constructor
+
+	struct PGM {};
+
+	basic_string(const T* s, AVRLIB_STRING_SIZE_TYPE n, PGM)
+		: _length(0)
+	{
+		assign_spgm(s, n);
+	}
+	
+	basic_string(const T* s, PGM)
+		: _length(0)
+	{
+		assign_spgm(s);
+	}
+
+// append
+
+	basic_string<T, _alloc_space>& append_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE n)
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
+		n = (_alloc_space - _length) < n? (_alloc_space - _length) : n;
+		for(AVRLIB_STRING_SIZE_TYPE i = 0; i != n; ++i, ++_length)
+			m_data[_length] = pgm_read_elem(s + i);
+		return *this;
+	}
+	
+	basic_string<T, _alloc_space>& append_spgm(const T* s)
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
+		for(; _length != _alloc_space && *s != 0; ++s, ++_length)
+			m_data[_length] = pgm_read_elem(s);
+		return *this;
+	}
+	
+// assign
+
+	basic_string<T, _alloc_space>& assign_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE n)
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
+		n = _alloc_space < n? _alloc_space : n;
+		for (_length = 0; _length != n; ++_length, ++s)
+			m_data[_length] = pgm_read_elem(s);
+		return *this;
+	}
+	
+	basic_string<T, _alloc_space>& assign_spgm(const T* s)
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return *this;
+		for(_length = 0; _length != _alloc_space && *s != 0; ++s, ++_length)
+			m_data[_length] = pgm_read_elem(s);
+		return *this;
+	}
+	
+// insert
+
+	basic_string<T, _alloc_space>& insert_spgm(AVRLIB_STRING_SIZE_TYPE pos1, const T* s, AVRLIB_STRING_SIZE_TYPE n)
+	{
+		basic_string<T, _alloc_space> temp = substr(pos1);
+		erase(pos1);
+		append_spgm(s, n);
+		append(temp);
+		return *this;
+	}
+	
+	basic_string<T, _alloc_space>& insert_spgm(AVRLIB_STRING_SIZE_TYPE pos1, const T* s)
+	{
+		basic_string<T, _alloc_space> temp = substr(pos1);
+		erase(pos1);
+		append_spgm(s);
+		append(temp);
+		return *this;
+	}
+	
+// replace
+
+	basic_string<T, _alloc_space>& replace_spgm ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1,   const T* s, AVRLIB_STRING_SIZE_TYPE n2 )
+	{
+		erase(pos1, n1);
+		insert_spgm(pos1, s, n2);
+		return *this;
+	}
+	
+	basic_string<T, _alloc_space>& replace_spgm ( T* i1, T* i2, const T* s, AVRLIB_STRING_SIZE_TYPE n2 )
+	{
+		erase(i1, i2 - 1);
+		insert_spgm(i1 - begin(), s, n2);
+		return *this;
+	}
+	
+	basic_string<T, _alloc_space>& replace_spgm ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1,   const T* s )
+	{
+		erase(pos1, n1);
+		insert_spgm(pos1, s);
+		return *this;
+	}
+	
+	basic_string<T, _alloc_space>& replace_spgm ( T* i1, T* i2, const T* s )
+	{
+		erase(i1, i2 - 1);
+		insert_spgm(i1 - begin(), s);
+		return *this;
+	}
+	
+// find
+
+	AVRLIB_STRING_SIZE_TYPE find_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos = 0) const
+	{
+		if(pos >= _length || s == AVRLIB_STRING_NULLPTR || pgm_read_elem(0) == 0)
+			return npos;
+		for(;;)
+		{
+			for(; pos != _length; ++pos)
+				if (m_data[pos] == pgm_read_elem(0))
+					break;
+			if (pos == _length)
+				return npos;
+			AVRLIB_STRING_SIZE_TYPE j = 1;
+			T c = 0;
+			for(; (pos + j) != _length && m_data[pos + j] == (c = pgm_read_elem(j)) && c != 0; ++j);
+			if (c == 0)
+				return pos;
+			++pos;
+		}
+	}
+	
+	AVRLIB_STRING_SIZE_TYPE find_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
+	{
+		if(s == AVRLIB_STRING_NULLPTR || n == 0 || pos >= _length || n > _length || n > (_length - pos))
+			return npos;
+		for(;;)
+		{
+			for(; pos != _length; ++pos)
+				if (m_data[pos] == pgm_read_elem(0))
+					break;
+			if (n > (_length - pos))
+				return npos;
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j] == pgm_read_elem(j); ++j)
+				if (j == n)
+					return pos;
+			++pos;
+		}
+	}
+	
+//rfind
+
+	AVRLIB_STRING_SIZE_TYPE rfind_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
+	{
+		if(s == AVRLIB_STRING_NULLPTR || pgm_read_elem(0) == 0)
+			return npos;
+		AVRLIB_STRING_SIZE_TYPE len = strlen_spgm(s);
+		if (len > _length)
+			return npos;
+		if (pos > (_length - len))
+			pos = (_length - len);
+		++pos;
+		for(;;)
+		{
+			for(; pos != 0; --pos)
+				if (m_data[pos - 1] == pgm_read_elem(0))
+					break;
+			if (pos == 0)
+				return npos;
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j - 1] == pgm_read_elem(j); ++j)
+				if (j == len)
+					return pos - 1;
+			--pos;
+		}
+	}
+	
+	AVRLIB_STRING_SIZE_TYPE rfind_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
+	{
+		if(s == AVRLIB_STRING_NULLPTR || pgm_read_elem(0) == 0)
+			return npos;
+		if (n > _length)
+			return npos;
+		if (pos > (_length - n))
+			pos = (_length - n);
+		++pos;
+		for(;;)
+		{
+			for(; pos != 0; --pos)
+				if (m_data[pos - 1] == pgm_read_elem(0))
+					break;
+			if (pos == 0)
+				return npos;
+			for(AVRLIB_STRING_SIZE_TYPE j = 1; m_data[pos + j - 1] == pgm_read_elem(j); ++j)
+				if (j == n)
+					return pos - 1;
+			--pos;
+		}
+	}
+	
+// find_first_of
+
+	AVRLIB_STRING_SIZE_TYPE find_first_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
+			return npos;
+		for(; pos < _length; ++pos)
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; j != n; ++j)
+				if (m_data[pos] == pgm_read_elem(s + j))
+					return pos;
+		return npos;
+	}
+	
+	AVRLIB_STRING_SIZE_TYPE find_first_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos = 0) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
+		T c;
+		for(; pos < _length; ++pos)
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; (c = pgm_read_elem(s + j)) != 0; ++j)
+				if (m_data[pos] == c)
+					return pos;
+		return npos;
+	}
+	
+//find_last_of
+
+	AVRLIB_STRING_SIZE_TYPE find_last_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
+			return npos;
+		if (pos > _length)
+			pos = _length;
+		else
+			++pos;
+		for(; pos != 0; --pos)
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; j != n; ++j)
+				if (m_data[pos - 1] == pgm_read_elem(s + j))
+					return pos - 1;
+		return npos;
+	}
+	
+	AVRLIB_STRING_SIZE_TYPE find_last_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
+		if (pos > _length)
+			pos = _length;
+		else
+			++pos;
+		T c;
+		for(; pos != 0; --pos)
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; (c = pgm_read_elem(s + j)) != 0; ++j)
+				if (m_data[pos - 1] == c)
+					return pos - 1;
+		return npos;
+	}
+	
+//find_first_not_of
+	
+	AVRLIB_STRING_SIZE_TYPE find_first_not_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
+			return npos;
+		bool braked = false;
+		for(; pos < _length; ++pos)
+		{
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; j != n; ++j)
+			{
+				if (m_data[pos] == pgm_read_elem(s + j))
+				{
+					braked = true;
+					break;
+				}				
+			}
+			if (!braked)
+				return pos;
+			braked = false;
+		}						
+		return npos;
+	}
+	
+	AVRLIB_STRING_SIZE_TYPE find_first_not_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos = 0) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
+		bool braked = false;
+		T c;
+		for(; pos < _length; ++pos)
+		{
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; (c = pgm_read_elem(s + j)) != 0; ++j)
+			{
+				if (m_data[pos] == c)
+				{
+					braked = true;
+					break;
+				}				
+			}
+			if (!braked)
+				return pos;
+			braked = false;
+		}						
+		return npos;
+	}
+	
+//find_last_not_of
+
+	AVRLIB_STRING_SIZE_TYPE find_last_not_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos, AVRLIB_STRING_SIZE_TYPE n) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR || n == 0)
+			return npos;
+		bool braked = false;
+		if (pos > _length)
+			pos = _length;
+		else
+			++pos;
+		for(; pos != 0; --pos)
+		{
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; j != n; ++j)
+			{
+				if (m_data[pos - 1] == pgm_read_elem(s + j))
+				{
+					braked = true;
+					break;
+				}				
+			}
+			if (!braked)
+				return pos - 1;
+			braked = false;
+		}						
+		return npos;
+	}
+	
+	AVRLIB_STRING_SIZE_TYPE find_last_not_of_spgm(const T* s, AVRLIB_STRING_SIZE_TYPE pos = npos) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return npos;
+		bool braked = false;
+		if (pos > _length)
+			pos = _length;
+		else
+			++pos;
+		T c;
+		for(; pos != 0; --pos)
+		{
+			for(AVRLIB_STRING_SIZE_TYPE j = 0; (c = pgm_read_elem(s + j)) != 0; ++j)
+			{
+				if (m_data[pos - 1] == c)
+				{
+					braked = true;
+					break;
+				}				
+			}
+			if (!braked)
+				return pos - 1;
+			braked = false;
+		}						
+		return npos;
+	}
+
+// compare
+
+	int8_t compare_spgm ( const T* s ) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return empty() ? 0 : 1;
+		AVRLIB_STRING_SIZE_TYPE i = 0;
+		for(; i != _length; ++i)
+		{
+			T c = pgm_read_elem(s + i);
+			if (c == 0)
+				return 1;
+			if (m_data[i] == c)
+				continue;
+			if (m_data[i] < c)
+				return -1;
+			if (m_data[i] > c)
+				return 1;
+		}
+		if (pgm_read_elem(s + i) == 0)
+			return 0;
+		return -1;
+	}
+	
+	int8_t compare_spgm ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1, const T* s) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return empty() ? 0 : 1;
+		n1 = (pos1 + n1) <= _length? n1 : (_length - pos1);
+		AVRLIB_STRING_SIZE_TYPE i = 0;
+		for(; i != n1; ++i)
+		{
+			T c = pgm_read_elem(s + i);
+			if (*(s + i) == 0)
+				return 1;
+			if (m_data[i + pos1] == c)
+				continue;
+			if (m_data[i + pos1] < c)
+				return -1;
+			if (m_data[i + pos1] > c)
+				return 1;
+		}
+		if (pgm_read_elem(s + i) == 0)
+			return 0;
+		return -1;
+	}
+	
+	int8_t compare_spgm ( AVRLIB_STRING_SIZE_TYPE pos1, AVRLIB_STRING_SIZE_TYPE n1, const T* s, AVRLIB_STRING_SIZE_TYPE n2) const
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return empty() ? 0 : 1;
+		n1 = (pos1 + n1) <= _length? n1 : (_length - pos1);
+		if (n1 < n2)
+			return -1;
+		if (n1 > n2)
+			return 1;
+		for(AVRLIB_STRING_SIZE_TYPE i = 0; i != n1; ++i)
+		{
+			T c = pgm_read_elem(s + i);
+			if (m_data[i + pos1] == c)
+				continue;
+			if (m_data[i + pos1] < c)
+				return -1;
+			if (m_data[i + pos1] > c)
+				return 1;
+		}
+		return 0;
+	}
+	
+// auxiliary static methods
+
+	static AVRLIB_STRING_SIZE_TYPE strlen_spgm(const T* s)
+	{
+		if (s == AVRLIB_STRING_NULLPTR)
+			return 0;
+		AVRLIB_STRING_SIZE_TYPE n = 0;
+		for (; pgm_read_elem(s) != 0; ++s)
+			++n;
+		return n;
+	}
+	
+	static T pgm_read_elem(const T* const addr)
+	{
+		switch(sizeof(T))
+		{
+			case 1: return pgm_read_byte(addr);
+			case 2: return pgm_read_word(addr);
+			case 4: return pgm_read_dword(addr);
+		}
+		T res;
+		memcpy_P(&res, addr, sizeof(T));
+		return res;
+	}
+	
+#endif // __PGMSPACE_H_
 	
 private:
-	char m_data[_alloc_space];
+	T m_data[_alloc_space];
 	AVRLIB_STRING_SIZE_TYPE _length;	
 	
 };//end of class basic_string
@@ -962,7 +1523,7 @@ typedef basic_string<char, AVRLIB_DEFAULT_STRING_SIZE> string;
 //comparison operators
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator== ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator == ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (lhs.compare(rhs) == 0)
 		return true;
@@ -970,7 +1531,7 @@ bool operator== ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator== ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator == ( const T* lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (rhs.compare(lhs) == 0)
 		return true;
@@ -978,7 +1539,7 @@ bool operator== ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator== ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
+bool operator == ( const avrlib::basic_string<T, size>& lhs, const T* rhs )
 {
 	if (lhs.compare(rhs) == 0)
 		return true;
@@ -987,7 +1548,7 @@ bool operator== ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
 
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator!= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator != ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (lhs.compare(rhs) != 0)
 		return true;
@@ -995,7 +1556,7 @@ bool operator!= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator!= ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator != ( const T* lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (rhs.compare(lhs) != 0)
 		return true;
@@ -1003,7 +1564,7 @@ bool operator!= ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator!= ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
+bool operator != ( const avrlib::basic_string<T, size>& lhs, const T* rhs )
 {
 	if (lhs.compare(rhs) != 0)
 		return true;
@@ -1012,7 +1573,7 @@ bool operator!= ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
 
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator< ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator < ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (lhs.compare(rhs) < 0)
 		return true;
@@ -1020,7 +1581,7 @@ bool operator< ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_s
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator< ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator < ( const T* lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (rhs.compare(lhs) > 0)
 		return true;
@@ -1028,7 +1589,7 @@ bool operator< ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator< ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
+bool operator < ( const avrlib::basic_string<T, size>& lhs, const T* rhs )
 {
 	if (lhs.compare(rhs) < 0)
 		return true;
@@ -1037,7 +1598,7 @@ bool operator< ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
 
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator> ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator > ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (lhs.compare(rhs) > 0)
 		return true;
@@ -1045,7 +1606,7 @@ bool operator> ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_s
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator> ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator > ( const T* lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (rhs.compare(lhs) < 0)
 		return true;
@@ -1053,7 +1614,7 @@ bool operator> ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator> ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
+bool operator > ( const avrlib::basic_string<T, size>& lhs, const T* rhs )
 {
 	if (lhs.compare(rhs) > 0)
 		return true;
@@ -1062,7 +1623,7 @@ bool operator> ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
 
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator<= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator <= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (lhs.compare(rhs) <= 0)
 		return true;
@@ -1070,7 +1631,7 @@ bool operator<= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator<= ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator <= ( const T* lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (rhs.compare(lhs) >= 0)
 		return true;
@@ -1078,7 +1639,7 @@ bool operator<= ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator<= ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
+bool operator <= ( const avrlib::basic_string<T, size>& lhs, const T* rhs )
 {
 	if (lhs.compare(rhs) <= 0)
 		return true;
@@ -1087,7 +1648,7 @@ bool operator<= ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
 
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator>= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator >= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (lhs.compare(rhs) >= 0)
 		return true;
@@ -1095,7 +1656,7 @@ bool operator>= ( const avrlib::basic_string<T, size>& lhs, const avrlib::basic_
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator>= ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
+bool operator >= ( const T* lhs, const avrlib::basic_string<T, size>& rhs )
 {
 	if (rhs.compare(lhs) <= 0)
 		return true;
@@ -1103,7 +1664,7 @@ bool operator>= ( const char* lhs, const avrlib::basic_string<T, size>& rhs )
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-bool operator>= ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
+bool operator >= ( const avrlib::basic_string<T, size>& lhs, const T* rhs )
 {
 	if (lhs.compare(rhs) >= 0)
 		return true;
@@ -1114,7 +1675,7 @@ bool operator>= ( const avrlib::basic_string<T, size>& lhs, const char* rhs )
 //operator +
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-avrlib::string operator+ (const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs)
+avrlib::string operator + (const avrlib::basic_string<T, size>& lhs, const avrlib::basic_string<T, size>& rhs)
 {
 	avrlib::string ret = lhs;
 	ret += rhs;
@@ -1122,7 +1683,7 @@ avrlib::string operator+ (const avrlib::basic_string<T, size>& lhs, const avrlib
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-avrlib::string operator+ (const char* lhs, const avrlib::basic_string<T, size>& rhs)
+avrlib::string operator + (const T* lhs, const avrlib::basic_string<T, size>& rhs)
 {
 	avrlib::string ret = lhs;
 	ret += rhs;
@@ -1130,7 +1691,7 @@ avrlib::string operator+ (const char* lhs, const avrlib::basic_string<T, size>& 
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-avrlib::string operator+ (char lhs, const avrlib::basic_string<T, size>& rhs)
+avrlib::string operator + (T lhs, const avrlib::basic_string<T, size>& rhs)
 {
 	avrlib::string ret;
 	ret.assign(1, lhs);
@@ -1139,7 +1700,7 @@ avrlib::string operator+ (char lhs, const avrlib::basic_string<T, size>& rhs)
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-avrlib::string operator+ (const avrlib::basic_string<T, size>& lhs, const char* rhs)
+avrlib::string operator + (const avrlib::basic_string<T, size>& lhs, const T* rhs)
 {
 	avrlib::string ret = lhs;
 	ret += rhs;
@@ -1147,7 +1708,7 @@ avrlib::string operator+ (const avrlib::basic_string<T, size>& lhs, const char* 
 }
 
 template <typename T, AVRLIB_STRING_SIZE_TYPE size>
-avrlib::string operator+ (const avrlib::basic_string<T, size>& lhs, char rhs)
+avrlib::string operator + (const avrlib::basic_string<T, size>& lhs, T rhs)
 {
 	avrlib::string ret = lhs;
 	ret += rhs;

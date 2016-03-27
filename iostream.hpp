@@ -78,6 +78,8 @@ bool number2string (Integer n, string &s, uint8_t align = 0,
 template <typename Integer>
 bool string2number(const string &s, Integer &res)
 {
+	if(s.empty())
+		return false;
 	uint8_t i = 0;
 	for(; s[i] == ' '; ++i)
 		if(i == s.length())
