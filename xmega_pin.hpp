@@ -22,6 +22,7 @@
 		static uint8_t get_value() { return (port##_OUT & (1<<(pin))) != 0; } \
 		static uint8_t get_dir() { return (port##_DIR & (1<<(pin))) != 0; } \
 		static void toggle() { port##_OUTTGL = (1<<(pin)); } \
+		static void toggle_dir() { port##_DIRTGL = (1<<(pin)); } \
 		static void pullup() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc; } \
 		static void pulldown() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLDOWN_gc; } \
 		static void wiredor() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_OPC_gm) | PORT_OPC_WIREDOR_gc; } \
@@ -61,9 +62,11 @@ struct pin_buffer_with_oe
 	typedef ValuePin value_pin;
 	typedef OePin oe_pin;
 
-	static void init()
+	static void init(const bool& invert_oe = false)
 	{
 		ValuePin::make_input();
+		if(invert_oe)
+			OePin::make_inverted();
 		OePin::make_low();
 	}
 
@@ -121,6 +124,11 @@ struct pin_buffer_with_oe
 	{
 		ValuePin::toggle();
 	}
+	
+	static void toggle_dir()
+	{
+		OePin::toggle();
+	}
 
 	static void make_inverted()
 	{
@@ -152,6 +160,7 @@ struct pin_t
 	uint8_t get_value() const { return (port.OUT & bm) != 0; }
 	uint8_t get_dir() const { return (port.DIR & bm) != 0; }
 	void toggle() { port.OUTTGL = bm; }
+	void toggle_dir() { port.DIRTGL = bm; }
 	void pullup() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc; }
 	void pulldown() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_PULLDOWN_gc; }
 	void wiredor() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_OPC_gm) | PORT_OPC_WIREDOR_gc; }
