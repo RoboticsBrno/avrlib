@@ -192,6 +192,17 @@ struct pin_t
 			case 1: intr1_en(en); break;
 		}
 	}
+	uint8_t is_intr0_enabled() const { return (port.INT0MASK & bm) != 0; }
+	uint8_t is_intr1_enabled() const { return (port.INT1MASK & bm) != 0; }
+	uint8_t is_intr_enabled(uint8_t n) const
+	{
+		switch(n)
+		{
+			case 0: return is_intr0_enabled();
+			case 1: return is_intr1_enabled();
+			default: return false;
+		}
+	}
 	
 	PORT_t& port;
 	uint8_t const bp;
