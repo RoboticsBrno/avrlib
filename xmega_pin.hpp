@@ -174,6 +174,7 @@ struct pin_t
 	uint8_t pinctrl() const { return *(&port.PIN0CTRL + bp); }
 	void make_inverted() { *(&port.PIN0CTRL + bp) |= PORT_INVEN_bm; }
 	void make_noninverted() { *(&port.PIN0CTRL + bp) &= ~PORT_INVEN_bm; }
+	bool is_inverted() const { return (*(&port.PIN0CTRL + bp) & PORT_INVEN_bm) != 0; }
 	void slew_rate_limit_enable() { *(&port.PIN0CTRL + bp) |= PORT_SRLEN_bm; }
 	void slew_rate_limit_disable() { *(&port.PIN0CTRL + bp) &= ~PORT_SRLEN_bm; }
 	void sence_both_edges() { *(&port.PIN0CTRL + bp) = (*(&port.PIN0CTRL + bp) & ~PORT_ISC_gm) | PORT_ISC_BOTHEDGES_gc; }
