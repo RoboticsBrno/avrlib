@@ -84,8 +84,8 @@ public:
 				sei();
 			}
 			m_tx_buffer.push(v);
-			if(m_async_tx)
-				m_usart.dre_interrupt(uart_intr_med);
+			if(m_usart.is_dre_interrupt_set())
+				m_usart.enable_dre_interrupt();
 		}
 		else
 		{
@@ -157,7 +157,7 @@ public:
 		}
 		else
 		{
-			m_usart.dre_interrupt(uart_intr_off);
+			m_usart.disable_dre_interrupt();
 		}
 		return false;
 	}
@@ -179,8 +179,15 @@ public:
 	usart_type & usart() { return m_usart; }
 	usart_type const & usart() const { return m_usart; }
 		
-	void async_tx(const bool& en) { m_async_tx = en; }
-	bool async_tx() const { return m_async_tx; }
+	void async_tx(const bool& en)
+	{
+		m_usart.dre_interrupt(en, false);
+	}
+	void async_tx(const uart_interrupt_priority_t& priority)
+	{
+		m_usart.dre_interrupt(priority, false);
+	}
+	bool async_tx() const { return m_usart.is_dre_interrupt_set(); }
 
 private:
 	usart_type m_usart;
@@ -188,7 +195,6 @@ private:
 	buffer<value_type, TxBufferSize==0?1:TxBufferSize> m_tx_buffer;
 	bootseq_type m_bootseq;
 	volatile overflow_type m_overflow;
-	volatile bool m_async_tx;
 };
 
 }
