@@ -24,29 +24,61 @@ enum uart_parity_t
 	uart_odd_parity = USART_PMODE_ODD_gc
 };
 
+#ifndef AVRLIB_USART_XMEGA_DEFAULT_INTERRUPT_PRIORITY
+#define AVRLIB_USART_XMEGA_DEFAULT_INTERRUPT_PRIORITY c_default_interrupt_priority
+#endif
+
 class uart_xmega
 {
 public:
 	typedef uint8_t value_type;
+
+	const uart_interrupt_priority_t c_default_interrupt_priority = AVRLIB_USART_XMEGA_DEFAULT_INTERRUPT_PRIORITY;
 
 	uart_xmega()
 		: m_p(0)
 	{
 	}
 
-	void open(USART_t & p, uint16_t baudrate, bool rx_interrupt = false, bool synchronous = false,
-		uart_data_bits_t data_bits = uart_8_bits, bool stopbit2 = false, uart_parity_t parity = uart_no_parity)
+	void open(USART_t & p, uint16_t baudrate, bool rxc_interrupt = false, bool synchronous = false,
+		uart_data_bits_t data_bits = uart_8_bits, bool stopbit2 = false, 
+		uart_parity_t parity = uart_no_parity, bool dre_interrupt = false,
+		bool txc_interrupt = false)
+	{
+		open(p,
+			 baudrate,
+			 rxc_interrupt ? c_default_interrupt_priority : uart_intr_off,
+			 dre_interrupt ? c_default_interrupt_priority : uart_intr_off,
+			 txc_interrupt ? c_default_interrupt_priority : uart_intr_off,
+			 synchronous,
+			 data_bits,
+			 stopbit2,
+			 parity);
+	}
+
+	void open(USART_t & p,
+			  uint16_t baudrate,
+			  uart_interrupt_priority_t rxc_interrupt = uart_intr_off,
+			  uart_interrupt_priority_t dre_interrupt = uart_intr_off,
+			  uart_interrupt_priority_t txc_interrupt = uart_intr_off,
+			  bool synchronous = false,
+			  uart_data_bits_t data_bits = uart_8_bits,
+			  bool stopbit2 = false,
+			  uart_parity_t parity = uart_no_parity)
 	{
 		m_p = &p;
 		this->set_speed(baudrate);
-		if (rx_interrupt)
-			m_p->CTRLA = USART_RXCINTLVL_MED_gc;
-		else
-			m_p->CTRLA = 0;
+
+		m_txc_intr_prior = USART_TXCINTLVL_t(txc_interrupt<<USART_TXCINTLVL_gp);
+		m_rxc_intr_prior = USART_RXCINTLVL_t(rxc_interrupt<<USART_RXCINTLVL_gp);
+		m_dre_intr_prior = USART_DREINTLVL_t(dre_interrupt<<USART_DREINTLVL_gp);
+
 		m_p->CTRLC = (synchronous? USART_CMODE_SYNCHRONOUS_gc: USART_CMODE_ASYNCHRONOUS_gc)
 			| (data_bits & USART_CHSIZE_gm) | (parity & USART_PMODE_gm)
 			| (stopbit2<<USART_SBMODE_bp);
 		m_p->CTRLB = USART_RXEN_bm | USART_TXEN_bm;
+
+		m_p->CTRLA = m_txc_intr_prior | m_rxc_intr_prior | m_dre_intr_prior;
 	}
 
 	void close()
@@ -135,29 +167,113 @@ public:
 		return m_p;
 	}
 	
-	void rxc_interrupt(const uart_interrupt_priority_t& priority)
+	void rxc_interrupt(const bool& en, const bool& use = true)
 	{
-		m_p->CTRLA = (m_p->CTRLA & ~USART_RXCINTLVL_gm) | (priority<<USART_RXCINTLVL_gp);
+		rxc_interrupt(en ? c_default_interrupt_priority : uart_intr_off, use);
+	}
+	void rxc_interrupt(const uart_interrupt_priority_t& priority, const bool& use = true)
+	{
+		m_rxc_intr_prior = USART_RXCINTLVL_t(priority<<USART_RXCINTLVL_gp);
+		if(use)
+			m_p->CTRLA = (m_p->CTRLA & ~USART_RXCINTLVL_gm) | m_rxc_intr_prior;
+	}
+
+	uart_interrupt_priority_t get_rxc_interrupt() const
+	{
+		return uart_interrupt_priority_t(m_rxc_intr_prior>>USART_RXCINTLVL_gp);
+	}
+	uart_interrupt_priority_t read_rxc_interrupt() const
+	{
+		return uart_interrupt_priority_t((m_p->CTRLA & USART_RXCINTLVL_gm)>>USART_RXCINTLVL_gp);
 	}
 	
-	bool rxc_interrupt() const { return (m_p->CTRLA & USART_RXCINTLVL_gm) != 0; }
-	
-	void txc_interrupt(const uart_interrupt_priority_t& priority)
+	bool rxc_interrupt() const { return read_rxc_interrupt() != uart_intr_off; } // deprecated
+	bool is_rxc_interrupt_enable() const { return read_rxc_interrupt() != uart_intr_off; }
+	bool is_rxc_interrupt_set() const { return get_rxc_interrupt() != uart_intr_off; }
+
+	void enable_rxc_interrupt(const bool& enable = true)
 	{
-		m_p->CTRLA = (m_p->CTRLA & ~USART_TXCINTLVL_gm) | (priority<<USART_TXCINTLVL_gp);
+		m_p->CTRLA = (m_p->CTRLA & (~USART_RXCINTLVL_gm)) | (enable ? m_rxc_intr_prior : USART_RXCINTLVL_OFF_gc);
+	}
+
+	void disable_rxc_interrupt()
+	{
+		enable_rxc_interrupt(false);
+	}
+
+	void txc_interrupt(const bool& en, const bool& use = true)
+	{
+		txc_interrupt(en ? c_default_interrupt_priority : uart_intr_off, use);
+	}
+	void txc_interrupt(const uart_interrupt_priority_t& priority, const bool& use = true)
+	{
+		m_txc_intr_prior = USART_TXCINTLVL_t(priority<<USART_TXCINTLVL_gp);
+		if(use)
+			m_p->CTRLA = (m_p->CTRLA & ~USART_TXCINTLVL_gm) | m_txc_intr_prior;
+	}
+
+	uart_interrupt_priority_t get_txc_interrupt() const
+	{
+		return uart_interrupt_priority_t(m_txc_intr_prior>>USART_TXCINTLVL_gp);
+	}
+	uart_interrupt_priority_t read_txc_interrupt() const
+	{
+		return uart_interrupt_priority_t((m_p->CTRLA & USART_TXCINTLVL_gm)>>USART_TXCINTLVL_gp);
 	}
 	
-	bool tx_interrupt() const { return (m_p->CTRLA & USART_TXCINTLVL_gm) != 0; }
-	
-	void dre_interrupt(const uart_interrupt_priority_t& priority)
+	bool tx_interrupt() const { return read_txc_interrupt() != uart_intr_off; } // deprecated
+	bool is_txc_interrupt_enable() const { return read_txc_interrupt() != uart_intr_off; }
+	bool is_txc_interrupt_set() const { return get_txc_interrupt() != uart_intr_off; }
+
+	void enable_txc_interrupt(const bool& enable = true)
 	{
-		m_p->CTRLA = (m_p->CTRLA & ~USART_DREINTLVL_gm) | (priority<<USART_DREINTLVL_gp);
+		m_p->CTRLA = (m_p->CTRLA & (~USART_TXCINTLVL_gm)) | (enable ? m_txc_intr_prior : USART_TXCINTLVL_OFF_gc);
 	}
+
+	void disable_txc_interrupt()
+	{
+		enable_txc_interrupt(false);
+	}
+
+	void dre_interrupt(const bool& en, const bool& use = true)
+	{
+		dre_interrupt(en ? c_default_interrupt_priority : uart_intr_off, use);
+	}
+	void dre_interrupt(const uart_interrupt_priority_t& priority, const bool& use = true)
+	{
+		m_dre_intr_prior = USART_DREINTLVL_t(priority<<USART_DREINTLVL_gp);
+		if(use)
+			m_p->CTRLA = (m_p->CTRLA & ~USART_DREINTLVL_gm) | m_dre_intr_prior;
+	}
+
+	uart_interrupt_priority_t get_dre_interrupt() const
+	{
+		return uart_interrupt_priority_t(m_dre_intr_prior>>USART_DREINTLVL_gp);
+	}
+	uart_interrupt_priority_t read_dre_interrupt() const
+	{
+		return uart_interrupt_priority_t((m_p->CTRLA & USART_DREINTLVL_gm)>>USART_DREINTLVL_gp);
+	}
+
+	bool dre_interrupt() const { return read_dre_interrupt() != uart_intr_off; } // deprecated
+	bool is_dre_interrupt_enabled() const {return read_dre_interrupt() != uart_intr_off; }
+	bool is_dre_interrupt_set() const {return get_dre_interrupt() != uart_intr_off; }
 	
-	bool dre_interrupt() const { return (m_p->CTRLA & USART_DREINTLVL_gm) != 0; }
-	
+	void enable_dre_interrupt(const bool& enable = true)
+	{
+		m_p->CTRLA = (m_p->CTRLA & (~USART_DREINTLVL_gm)) | (enable ? m_dre_intr_prior : USART_DREINTLVL_OFF_gc);
+	}
+
+	void disable_dre_interrupt()
+	{
+		enable_dre_interrupt(false);
+	}
+
 private:
 	USART_t * m_p;
+	USART_RXCINTLVL_t m_rxc_intr_prior;
+	USART_DREINTLVL_t m_dre_intr_prior;
+	USART_TXCINTLVL_t m_txc_intr_prior;
 };
 
 }
