@@ -269,6 +269,7 @@ public:
 			return *this;
 		char f = m_pattern.top();
 		bool hex =  false;
+		bool bin =  false;
 		uint8_t width = 0;
 		if(f == 'x')
 		{
@@ -276,10 +277,18 @@ public:
 			m_pattern.pop();
 			f = m_pattern.top();
 		}
+		else if(f == 'b')
+		{
+			bin = true;
+			m_pattern.pop();
+			f = m_pattern.top();
+		}
 		if(f >='0' && f <= '9')
 			width = f - '0';
 		if (hex)
 			send_hex(m_out, t, width);
+		else if (bin)
+			send_bin_text(m_out, t, width);
 		else
 			send_int(m_out, t, width);
 		if(!m_pattern.empty())
