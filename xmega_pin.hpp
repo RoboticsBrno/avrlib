@@ -45,6 +45,8 @@
 		static void input_disable() { port##_PIN##pin##CTRL = (port##_PIN##pin##CTRL & ~PORT_ISC_gm) | PORT_ISC_INPUT_DISABLE_gc; } \
 	}
 
+namespace avrlib {
+
 template <typename PinHigh, typename PinLow>
 struct pin_totem_drive
 {
@@ -141,7 +143,6 @@ struct pin_buffer_with_oe
 	}
 };
 
-
 struct pin_t
 {
 	pin_t(PORT_t& port, const uint8_t& pin)
@@ -190,7 +191,7 @@ struct pin_t
 		{
 			case 0: intr0_en(en); break;
 			case 1: intr1_en(en); break;
-		}
+			}
 	}
 	uint8_t is_intr0_enabled() const { return (port.INT0MASK & bm) != 0; }
 	uint8_t is_intr1_enabled() const { return (port.INT1MASK & bm) != 0; }
@@ -201,12 +202,14 @@ struct pin_t
 			case 0: return is_intr0_enabled();
 			case 1: return is_intr1_enabled();
 			default: return false;
-		}
+			}
 	}
 	
 	PORT_t& port;
 	uint8_t const bp;
 	uint8_t const bm;
 };
+
+} // end of namespace avrlib
 
 #endif // AVRLIB_XMEGA_PIN_HPP
