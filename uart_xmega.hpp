@@ -7,22 +7,6 @@
 #include "usart_base.hpp"
 
 namespace avrlib {
-	
-enum uart_data_bits_t
-{
-	uart_5_bits = USART_CHSIZE_5BIT_gc,
-	uart_6_bits = USART_CHSIZE_6BIT_gc,
-	uart_7_bits = USART_CHSIZE_7BIT_gc,
-	uart_8_bits = USART_CHSIZE_8BIT_gc,
-	uart_9_bits = USART_CHSIZE_9BIT_gc
-};
-
-enum uart_parity_t
-{
-	uart_no_parity = USART_PMODE_DISABLED_gc,
-	uart_even_parity = USART_PMODE_EVEN_gc,
-	uart_odd_parity = USART_PMODE_ODD_gc
-};
 
 #ifndef AVRLIB_USART_XMEGA_DEFAULT_INTERRUPT_PRIORITY
 #define AVRLIB_USART_XMEGA_DEFAULT_INTERRUPT_PRIORITY c_default_interrupt_priority
