@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 #include "usart_base.hpp"
-#include "intr_prio.hpp"
 
 #ifndef FE1
 #define FE1 FE
@@ -13,24 +12,11 @@
 #ifndef UPE1
 #define UPE1 UPE
 #endif
+#ifndef UMSEL10
+#define UMSEL10 UMSEL1
+#endif
 
 namespace avrlib {
-
-enum uart_data_bits_t
-{
-	uart_5_bits = 0,
-	uart_6_bits = 1,
-	uart_7_bits = 2,
-	uart_8_bits = 3,
-	uart_9_bits = 7
-};
-
-enum uart_parity_t
-{
-	uart_no_parity   = (0<<UPM01) | (0<<UPM00),
-	uart_even_parity = (1<<UPM01) | (0<<UPM00),
-	uart_odd_parity  = (1<<UPM01) | (1<<UPM00)
-};
 
 class usart1
 {

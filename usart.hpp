@@ -5,29 +5,12 @@
 #include <stdint.h>
 
 #include "usart_base.hpp"
-#include "intr_prio.hpp"
 
 #ifndef UPE
 #define UPE PE
 #endif
 
 namespace avrlib {
-
-enum uart_data_bits_t
-{
-	uart_5_bits = 0,
-	uart_6_bits = 1,
-	uart_7_bits = 2,
-	uart_8_bits = 3,
-	uart_9_bits = 7
-};
-
-enum uart_parity_t
-{
-	uart_no_parity   = (0<<UPM1) | (0<<UPM0),
-	uart_even_parity = (1<<UPM1) | (0<<UPM0),
-	uart_odd_parity  = (1<<UPM1) | (1<<UPM0)
-};
 
 class usart
 {
@@ -212,8 +195,7 @@ public:
 	{
 		m_rxc_intr = en;
 		if (use)
-			_rxc_interrupt(en)
-		
+			_rxc_interrupt(en);
 	}
 	
 	bool rxc_interrupt() const { return (UCSRB & (1<<RXCIE)) != 0; } // deprecated
