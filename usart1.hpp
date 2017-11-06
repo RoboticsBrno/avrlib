@@ -42,6 +42,11 @@ public:
 		close();
 	}
 
+	void open(uint32_t speed, bool rx_interrupt = false)
+	{
+		this->open(detail::get_ubrr(speed), rx_interrupt);
+	}
+
 	void open(uint16_t baudrate,
 			  uart_interrupt_priority_t rxc_interrupt = uart_intr_off,
 			  uart_interrupt_priority_t dre_interrupt = uart_intr_off,
