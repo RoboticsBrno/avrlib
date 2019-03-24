@@ -2,13 +2,9 @@
 
 Avrlib is C/C++ library for AVR microcontroller's (Tiny, Mage, Xmega) from Atmel/Microchip.
 
-Authors:
-- [avakar](https://github.com/avakar)
-- [cednik](https://github.com/cednik)
-- [jarekparal](https://github.com/jarekparal)
-- ...
+[Authors](https://github.com/RoboticsBrno/avrlib/graphs/contributors)
 
-Help with:
+## Avrlib help with:
 - pins (pin.hpp, porta.hpp...)
 - timers (time1.hpp, time3.hpp...)
 - usart (usart.hpp, usart0.hpp...)
